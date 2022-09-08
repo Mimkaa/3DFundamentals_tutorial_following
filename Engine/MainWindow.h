@@ -37,6 +37,7 @@ protected:
 	HWNDKey() = default;
 protected:
 	HWND hWnd = nullptr;
+	HANDLE hConsole = nullptr;
 };
 
 class MainWindow : public HWNDKey
