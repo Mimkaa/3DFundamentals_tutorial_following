@@ -23,11 +23,14 @@
 #include "Mat3.h"
 #include "SolidCubeScene.h"
 #include "TexCubeScene.h"
+#include "TexCubeSceneWrap.h"
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
 	scenes.push_back(std::make_unique<SolidCubeScene>());
 	scenes.push_back(std::make_unique<TexCubeScene>());
+	scenes.push_back(std::make_unique<TexWrapCubeScene>());
 	curScene = scenes.begin();
+
 }
 
 void Game::Go()
