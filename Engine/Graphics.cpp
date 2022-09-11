@@ -538,43 +538,12 @@ void Graphics::DrawFlatTopTriangleTex(const TexVertex& v0, const TexVertex& v1, 
 	const TexVertex dv0 = (v2 - v0) / delta_y;
 	const TexVertex dv1 = (v2 - v1) / delta_y;
 
-	// edge interpolants
-	TexVertex itEdge0 = v0;
+	// edge interpolant
+
 	TexVertex itEdge1 = v1;
 
-	// calculate start and end scanlines
-	const int yStart = (int)ceil(v0.pos.y - 0.5f);
-	const int yEnd = (int)ceil(v2.pos.y - 0.5f);
-
-	// do interpolant prestep (v1.pos.y = v0.pos.y)
-	itEdge0 += dv0 * (float(yStart) + 0.5f - v0.pos.y);
-	itEdge1 += dv1 * (float(yStart) + 0.5f - v0.pos.y);
-	//clamp width & height values
-	const float tex_width = (float)texture.GetWidth();
-	const float tex_height = (float)texture.GetHeight();
-	const float clamp_height = tex_height - 1.0f;
-	const float clamp_width = tex_width - 1.0f;
-
-	for (int y = yStart; y < yEnd; y++, itEdge0 += dv0, itEdge1+= dv1)
-	{
-		// calculate start and end pixels
-		const int xStart = (int)ceil(itEdge0.pos.x - 0.5f);
-		const int xEnd = (int)ceil(itEdge1.pos.x - 0.5f);
-
-		// get step along the texture
-		Vec2 ScanStepAlong = (itEdge1.tc_pos - itEdge0.tc_pos) / (itEdge1.pos.x - itEdge0.pos.x);
-
-		// create scan start point and prestep
-		Vec2 StartScanPoint = itEdge0.tc_pos + ScanStepAlong *((float)xStart + 0.5 - itEdge0.pos.x);
-
-		for (int x = xStart; x < xEnd; x++, StartScanPoint += ScanStepAlong)
-		{
-			PutPixel(x, y, texture.GetPixel(
-				int(std::min(StartScanPoint.x * tex_width, clamp_width)),
-				int(std::min(StartScanPoint.y * tex_width, clamp_height))
-			));
-		}
-	}
+	DrawFlatTriangleTex(v0, v1, v2, texture, dv0, dv1, itEdge1);
+	
 }
 
 void Graphics::DrawFlatBottomTriangleTex(const TexVertex& v0, const TexVertex& v1, const TexVertex& v2, const Surface& texture)
@@ -584,44 +553,50 @@ void Graphics::DrawFlatBottomTriangleTex(const TexVertex& v0, const TexVertex& v
 	const TexVertex dv0 = (v1 - v0) / delta_y;
 	const TexVertex dv1 = (v2 - v0) / delta_y;
 
-	// create edge interpolants
-	TexVertex itEdge0 = v0;
+	// create edge interpolt
 	TexVertex itEdge1 = v0;
+	DrawFlatTriangleTex(v0, v1, v2, texture, dv0, dv1, itEdge1);
 
+}
+
+void Graphics::DrawFlatTriangleTex(const TexVertex& v0, const TexVertex& v1, const TexVertex& v2, const Surface& tex,
+	const TexVertex& dv0, const TexVertex& dv1, TexVertex& itEdge1)
+{
+	// create edge interpolant for left edge (always v0)
+	TexVertex itEdge0 = v0;
 
 	// calculate start and end scanlines
 	const int yStart = (int)ceil(v0.pos.y - 0.5f);
-	const int yEnd = (int)ceil(v1.pos.y - 0.5f);
+	const int yEnd = (int)ceil(v2.pos.y - 0.5f); // the scanline AFTER the last line drawn
+
 
 	// do interpolant prestep
 	itEdge0 += dv0 * (float(yStart) + 0.5f - v0.pos.y);
 	itEdge1 += dv1 * (float(yStart) + 0.5f - v0.pos.y);
-
-	//clamp width & height values
-	const float tex_width = (float)texture.GetWidth();
-	const float tex_height = (float)texture.GetHeight();
-	const float clamp_height = tex_height - 1.0f;
-	const float clamp_width = tex_width - 1.0f;
-
+	// init tex width/height and clamp values
+	const float tex_width = float(tex.GetWidth());
+	const float tex_height = float(tex.GetHeight());
+	const float tex_clamp_x = tex_width - 1.0f;
+	const float tex_clamp_y = tex_height - 1.0f;
 	for (int y = yStart; y < yEnd; y++, itEdge0 += dv0, itEdge1 += dv1)
 	{
+		// calculate start and end pixels
 		const int xStart = (int)ceil(itEdge0.pos.x - 0.5f);
 		const int xEnd = (int)ceil(itEdge1.pos.x - 0.5f); // the pixel AFTER the last pixel drawn
 
-		
+		// calculate scanline dTexCoord / dx
+		const Vec2 dtcLine = (itEdge1.tc_pos - itEdge0.tc_pos) / (itEdge1.pos.x - itEdge0.pos.x);
+		// create scanline tex coord interpolant and prestep
+		Vec2 itcLine = itEdge0.tc_pos + dtcLine * (float(xStart) + 0.5f - itEdge0.pos.x);
 
-		// get step along the texture
-		const Vec2 ScanStepAlong = (itEdge1.tc_pos - itEdge0.tc_pos) / (itEdge1.pos.x - itEdge0.pos.x);
-
-		// create scan start point and prestep
-		Vec2 StartScanPoint = itEdge0.tc_pos + ScanStepAlong * ((float)xStart + 0.5 - itEdge0.pos.x);
-
-		for (int x = xStart; x < xEnd; x++, StartScanPoint += ScanStepAlong)
+		for (int x = xStart; x < xEnd; x++, itcLine += dtcLine)
 		{
-			PutPixel(x, y, texture.GetPixel(
-				int(std::min(StartScanPoint.x * tex_width, clamp_width)),
-				int(std::min(StartScanPoint.y * tex_width, clamp_height))
-			));
+		
+				PutPixel(x, y, tex.GetPixel(
+					int(std::min(itcLine.x * tex_width, tex_clamp_x)),
+					int(std::min(itcLine.y * tex_height, tex_clamp_y))));
+			// need std::min b/c tc.x/y == 1.0, we'll read off edge of tex
+			// and with fp err, tc.x/y can be > 1.0 (by a tiny amount)
 		}
 	}
 
