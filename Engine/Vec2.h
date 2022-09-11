@@ -102,6 +102,13 @@ public:
 		y *= rhs;
 		return *this;
 	}
+	_Vec2& operator*=(const _Vec2& rhs)
+	{
+		x *= rhs.x;
+		y *= rhs.y;
+		return *this;
+	}
+	
 	_Vec2	operator*( const T &rhs ) const
 	{
 		return _Vec2( *this ) *= rhs;
@@ -110,6 +117,12 @@ public:
 	{
 		x /= rhs;
 		y /= rhs;
+		return *this;
+	}
+	_Vec2& operator/=(const _Vec2& rhs)
+	{
+		x /= rhs.x;
+		y /= rhs.y;
 		return *this;
 	}
 	_Vec2	operator/( const T &rhs ) const

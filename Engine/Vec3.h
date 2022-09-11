@@ -109,7 +109,15 @@ public:
 	{
 		return _Vec3( *this ) -= rhs;
 	}
-	_Vec3&	operator*=( const T &rhs )
+	_Vec3&	operator*=(const _Vec3& rhs)
+	{
+		x *= rhs.x;
+		y *= rhs.y;
+		z *= rhs.z;
+		return *this;
+	}
+	
+	_Vec3& operator*=(const T& rhs)
 	{
 		x *= rhs;
 		y *= rhs;
@@ -125,6 +133,13 @@ public:
 		x /= rhs;
 		y /= rhs;
 		z /= rhs;
+		return *this;
+	}
+	_Vec3& operator/=(const _Vec3& rhs)
+	{
+		x /= rhs.x;
+		y /= rhs.y;
+		z /= rhs.z;
 		return *this;
 	}
 	_Vec3	operator/( const T &rhs ) const

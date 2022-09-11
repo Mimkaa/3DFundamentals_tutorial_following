@@ -15,7 +15,66 @@ public:
 		};
 	}
 
-
+	TexVertex& operator += (const TexVertex other)
+	{
+		pos += other.pos;
+		tc_pos += other.tc_pos;
+		return *this;
+	}
+	TexVertex operator + (const TexVertex other) const
+	{
+		return TexVertex(*this) += other;
+	}
+	TexVertex& operator -= (const TexVertex other)
+	{
+		pos -= other.pos;
+		tc_pos -= other.tc_pos;
+		return *this;
+	}
+	TexVertex operator - (const TexVertex other) const
+	{
+		return TexVertex(*this) -= other;
+	}
+	TexVertex& operator *= (const TexVertex other)
+	{
+		pos *= other.pos;
+		tc_pos *= other.tc_pos;
+		return *this;
+	}
+	TexVertex& operator *= (const float num)
+	{
+		pos *= num;
+		tc_pos *= num;
+		return *this;
+	}
+	TexVertex operator * (const TexVertex other) const
+	{
+		return TexVertex(*this) *= other;
+	}
+	TexVertex operator * (const float num) const
+	{
+		return TexVertex(*this) *= num;
+	}
+	TexVertex& operator /= (const TexVertex other)
+	{
+		pos /= other.pos;
+		tc_pos /= other.tc_pos;
+		return *this;
+	}
+	TexVertex& operator /= (const float num)
+	{
+		pos /= num;
+		tc_pos /= num;
+		return *this;
+	}
+	TexVertex operator / (const TexVertex other) const
+	{
+		return TexVertex(*this) /= other;
+	}
+	TexVertex operator / (const float num) const
+	{
+		return TexVertex(*this) /= num;
+	}
 	// tc - texture
 	Vec3 pos;
 	Vec2 tc_pos;
