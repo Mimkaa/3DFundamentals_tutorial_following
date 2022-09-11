@@ -21,13 +21,13 @@
 #include "MainWindow.h"
 #include "Game.h"
 #include "Mat3.h"
-
-Game::Game( MainWindow& wnd )
-	:
-	wnd( wnd ),
-	gfx( wnd ),
-	cube( 1.0f )
+#include "SolidCubeScene.h"
+#include "TexCubeScene.h"
+Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
+	scenes.push_back(std::make_unique<SolidCubeScene>());
+	scenes.push_back(std::make_unique<TexCubeScene>());
+	curScene = scenes.begin();
 }
 
 void Game::Go()
@@ -41,91 +41,28 @@ void Game::Go()
 void Game::UpdateModel()
 {
 	const float dt = 1.0f / 60.0f;
-	if( wnd.kbd.KeyIsPressed( 'Q' ) )
+	while (!wnd.kbd.KeyIsEmpty())
 	{
-		theta_x = wrap_angle( theta_x + dTheta * dt );
+		const auto e = wnd.kbd.ReadKey();
+		if (e.GetCode() == VK_TAB && e.IsPress())
+		{
+			CycleScenes();
+		}
 	}
-	if( wnd.kbd.KeyIsPressed( 'W' ) )
+	// update scene
+	(*curScene)->Update(wnd.kbd, wnd.mouse, dt);
+}
+
+void Game::CycleScenes()
+{
+	if (++curScene == scenes.end())
 	{
-		theta_y = wrap_angle( theta_y + dTheta * dt );
-	}
-	if( wnd.kbd.KeyIsPressed( 'E' ) )
-	{
-		theta_z = wrap_angle( theta_z + dTheta * dt );
-	}
-	if( wnd.kbd.KeyIsPressed( 'A' ) )
-	{
-		theta_x = wrap_angle( theta_x - dTheta * dt );
-	}
-	if( wnd.kbd.KeyIsPressed( 'S' ) )
-	{
-		theta_y = wrap_angle( theta_y - dTheta * dt );
-	}
-	if( wnd.kbd.KeyIsPressed( 'D' ) )
-	{
-		theta_z = wrap_angle( theta_z - dTheta * dt );
-	}
-	if( wnd.kbd.KeyIsPressed( 'R' ) )
-	{
-		offset_z += 2.0f * dt;
-	}
-	if( wnd.kbd.KeyIsPressed( 'F' ) )
-	{
-		offset_z -= 2.0f * dt;
+		curScene = scenes.begin();
 	}
 }
 
 void Game::ComposeFrame()
 {
-	const Color colors[12] = {
-		Colors::White,
-		Colors::Blue,
-		Colors::Cyan,
-		Colors::Green,
-		Colors::LightGray,
-		Colors::Red,
-		Colors::Magenta,
-		Colors::Yellow,
-		Colors::White,
-		Colors::Cyan,
-		Colors::Red,
-		Colors::Blue,
-	};
-	
-	auto triangles = cube.GetTriangles();
-	const Mat3 rot =
-		Mat3::RotationX( theta_x ) *
-		Mat3::RotationY( theta_y ) *
-		Mat3::RotationZ( theta_z );
-	
-	for( auto& v : triangles.vertices )
-	{
-		v *= rot;
-		v += { 0.0f,0.0f,offset_z };
-		
-	}
-	// backface culling test
-	for (size_t i = 0, end = triangles.indices.size() / 3; i < end; i++)
-	{
-		const Vec3& v0 = triangles.vertices[triangles.indices[i * 3]];
-		const Vec3& v1 = triangles.vertices[triangles.indices[i * 3 + 1]];
-		const Vec3& v2 = triangles.vertices[triangles.indices[i * 3 + 2]];
-		// don`t forget %-cross product , * - dot product
-		triangles.cullFlags[i] = (v1 - v0) % (v2 - v0) * v0 > 0.0f;
-	}
-
-	// transform to screen space
-	for (auto& v : triangles.vertices)
-	{
-		pst.Transform(v);
-	}
-	// draw triangles
-	for (size_t i = 0, end = triangles.indices.size() / 3; i < end; i++)
-	{
-		// skip triangles that are back-facing
-		if (!triangles.cullFlags[i]) {
-			gfx.DrawTriangle(triangles.vertices[triangles.indices[i * 3]], triangles.vertices[triangles.indices[i * 3 + 1]],
-				triangles.vertices[triangles.indices[i * 3 + 2]], colors[i]);
-		}
-	}
+	// draw scene
+	(*curScene)->Draw(gfx);
 }

@@ -23,6 +23,9 @@
 #include "Graphics.h"
 #include "PubeScreenTransformer.h"
 #include "Cube.h"
+#include "Scene.h"
+#include <memory>
+#include <vector>
 
 class Game
 {
@@ -36,18 +39,15 @@ private:
 	void UpdateModel();
 	/********************************/
 	/*  User Functions              */
+	void CycleScenes();
 	/********************************/
 private:
 	MainWindow& wnd;
 	Graphics gfx;
 	/********************************/
 	/*  User Variables              */
-	PubeScreenTransformer pst;
-	Cube cube;
-	static constexpr float dTheta = PI;
-	float offset_z = 2.0f;
-	float theta_x = 0.0f;
-	float theta_y = 0.0f;
-	float theta_z = 0.0f;
+	
+	std::vector<std::unique_ptr<Scene>> scenes;
+	std::vector<std::unique_ptr<Scene>>::iterator curScene;
 	/********************************/
 };

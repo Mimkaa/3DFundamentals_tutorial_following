@@ -124,6 +124,11 @@ public:
 	{
 		return !(*this == rhs);
 	}
+	_Vec2 InterpolateTo(const _Vec2 & end_vec, float extend) const
+	{
+		_Vec2 result = *this + (end_vec - *this) * extend;
+		return result;
+	}
 public:
 	T x;
 	T y;
