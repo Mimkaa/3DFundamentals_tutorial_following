@@ -6,9 +6,16 @@
 
 class Scene
 {
+
 public:
 	virtual void Update(Keyboard& kbd, Mouse& mouse, float dt) = 0;
 	virtual void Draw(Graphics& gfx) const = 0;
 	virtual ~Scene() = default;
+	const std::string& GetName() const
+	{
+		return name;
+	}
+private:
+	std::string name;
 };
 

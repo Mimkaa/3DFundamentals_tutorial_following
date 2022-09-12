@@ -40,6 +40,7 @@ private:
 	/********************************/
 	/*  User Functions              */
 	void CycleScenes();
+
 	/********************************/
 private:
 	MainWindow& wnd;

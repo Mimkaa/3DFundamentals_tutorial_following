@@ -99,6 +99,18 @@
     <ClInclude Include="TexCubeSceneWrap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CubeFolded.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FoldedCubeScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeFoldedWraped.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FoldedCubeWrapScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXErr.cpp">

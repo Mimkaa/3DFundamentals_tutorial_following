@@ -24,11 +24,16 @@
 #include "SolidCubeScene.h"
 #include "TexCubeScene.h"
 #include "TexCubeSceneWrap.h"
+#include "FoldedCubeScene.h"
+#include "FoldedCubeWrapScene.h"
+#include <sstream>
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
 	scenes.push_back(std::make_unique<SolidCubeScene>());
 	scenes.push_back(std::make_unique<TexCubeScene>());
 	scenes.push_back(std::make_unique<TexWrapCubeScene>());
+	scenes.push_back(std::make_unique<FoldedCubeScene>());
+	scenes.push_back(std::make_unique<FoldedCubeWrapScene>());
 	curScene = scenes.begin();
 
 }
@@ -63,6 +68,8 @@ void Game::CycleScenes()
 		curScene = scenes.begin();
 	}
 }
+
+
 
 void Game::ComposeFrame()
 {

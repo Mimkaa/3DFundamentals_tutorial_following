@@ -676,6 +676,7 @@ void Graphics::DrawFlatBottomTriangleTexWrap(const TexVertex& v0, const TexVerte
 	DrawFlatTriangleTexWrap(v0, v1, v2, tex, dv0, dv1, itEdge1);
 }
 
+
 void Graphics::DrawFlatTriangleTexWrap(const TexVertex& v0, const TexVertex& v1, const TexVertex& v2, const Surface& tex,
 	const TexVertex& dv0, const TexVertex& dv1, TexVertex& itEdge1)
 {
@@ -686,7 +687,7 @@ void Graphics::DrawFlatTriangleTexWrap(const TexVertex& v0, const TexVertex& v1,
 	const int yStart = (int)ceil(v0.pos.y - 0.5f);
 	const int yEnd = (int)ceil(v2.pos.y - 0.5f); // the scanline AFTER the last line drawn
 
-												   // do interpolant prestep
+	// do interpolant prestep
 	itEdge0 += dv0 * (float(yStart) + 0.5f - v0.pos.y);
 	itEdge1 += dv1 * (float(yStart) + 0.5f - v0.pos.y);
 
