@@ -15,65 +15,52 @@ public:
 		};
 	}
 
-	TexVertex& operator += (const TexVertex other)
+	TexVertex& operator+=(const TexVertex& rhs)
 	{
-		pos += other.pos;
-		tc_pos += other.tc_pos;
+		pos += rhs.pos;
+		tc_pos += rhs.tc_pos;
 		return *this;
 	}
-	TexVertex operator + (const TexVertex other) const
+	TexVertex operator+(const TexVertex& rhs) const
 	{
-		return TexVertex(*this) += other;
+		return TexVertex(*this) += rhs;
 	}
-	TexVertex& operator -= (const TexVertex other)
+	TexVertex& operator-=(const TexVertex& rhs)
 	{
-		pos -= other.pos;
-		tc_pos -= other.tc_pos;
+		pos -= rhs.pos;
+		tc_pos -= rhs.tc_pos;
 		return *this;
 	}
-	TexVertex operator - (const TexVertex other) const
+	TexVertex operator-(const TexVertex& rhs) const
 	{
-		return TexVertex(*this) -= other;
+		return TexVertex(*this) -= rhs;
 	}
-	TexVertex& operator *= (const TexVertex other)
+	TexVertex& operator*=(float rhs)
 	{
-		pos *= other.pos;
-		tc_pos *= other.tc_pos;
+		pos *= rhs;
+		tc_pos *= rhs;
 		return *this;
 	}
-	TexVertex& operator *= (const float num)
+	TexVertex operator*(float rhs) const
 	{
-		pos *= num;
-		tc_pos *= num;
+		return TexVertex(*this) *= rhs;
+	}
+	TexVertex& operator/=(float rhs)
+	{
+		pos /= rhs;
+		tc_pos /= rhs;
 		return *this;
 	}
-	TexVertex operator * (const TexVertex other) const
+	TexVertex operator/(float rhs) const
 	{
-		return TexVertex(*this) *= other;
+		return TexVertex(*this) /= rhs;
 	}
-	TexVertex operator * (const float num) const
+
+	TexVertex& operator=(const TexVertex& rhs)
 	{
-		return TexVertex(*this) *= num;
-	}
-	TexVertex& operator /= (const TexVertex other)
-	{
-		pos /= other.pos;
-		tc_pos /= other.tc_pos;
+		pos = rhs.pos;
+		tc_pos = rhs.tc_pos;
 		return *this;
-	}
-	TexVertex& operator /= (const float num)
-	{
-		pos /= num;
-		tc_pos /= num;
-		return *this;
-	}
-	TexVertex operator / (const TexVertex other) const
-	{
-		return TexVertex(*this) /= other;
-	}
-	TexVertex operator / (const float num) const
-	{
-		return TexVertex(*this) /= num;
 	}
 	// tc - texture
 	Vec3 pos;

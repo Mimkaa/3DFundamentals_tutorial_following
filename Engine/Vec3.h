@@ -49,7 +49,7 @@ public:
 	{
 		return sqrt( LenSq() );
 	}
-	_Vec3&	Normalize()
+	_Vec3& Normalize()
 	{
 		const T length = Len();
 		x /= length;
@@ -65,58 +65,41 @@ public:
 	}
 	_Vec3	operator-() const
 	{
-		return _Vec3( -x,-y,-z );
+		return _Vec3(-x, -y, -z);
 	}
-	_Vec3&	operator=( const _Vec3 &rhs )
+	_Vec3& operator=(const _Vec3& rhs)
 	{
 		x = rhs.x;
 		y = rhs.y;
 		z = rhs.z;
 		return *this;
 	}
-	_Vec3&	operator+=( const _Vec3 &rhs )
+	_Vec3& operator+=(const _Vec3& rhs)
 	{
 		x += rhs.x;
 		y += rhs.y;
 		z += rhs.z;
 		return *this;
 	}
-	_Vec3&	operator-=( const _Vec3 &rhs )
+	_Vec3& operator-=(const _Vec3& rhs)
 	{
 		x -= rhs.x;
 		y -= rhs.y;
 		z -= rhs.z;
 		return *this;
 	}
-	T		operator*( const _Vec3 &rhs ) const
+	T		operator*(const _Vec3& rhs) const
 	{
 		return x * rhs.x + y * rhs.y + z * rhs.z;
 	}
-	_Vec3 operator % (const _Vec3& rhs)
+	_Vec3	operator+(const _Vec3& rhs) const
 	{
-		return _Vec3(
-			y * rhs.z - z * rhs.y,
-			z * rhs.x - x * rhs.z,
-			x * rhs.y - y * rhs.x
-		);
-
+		return _Vec3(*this) += rhs;
 	}
-	_Vec3	operator+( const _Vec3 &rhs ) const
+	_Vec3	operator-(const _Vec3& rhs) const
 	{
-		return _Vec3( *this ) += rhs;
+		return _Vec3(*this) -= rhs;
 	}
-	_Vec3	operator-( const _Vec3 &rhs ) const
-	{
-		return _Vec3( *this ) -= rhs;
-	}
-	_Vec3&	operator*=(const _Vec3& rhs)
-	{
-		x *= rhs.x;
-		y *= rhs.y;
-		z *= rhs.z;
-		return *this;
-	}
-	
 	_Vec3& operator*=(const T& rhs)
 	{
 		x *= rhs;
@@ -124,33 +107,33 @@ public:
 		z *= rhs;
 		return *this;
 	}
-	_Vec3	operator*( const T &rhs ) const
+	_Vec3	operator*(const T& rhs) const
 	{
-		return _Vec3( *this ) *= rhs;
+		return _Vec3(*this) *= rhs;
 	}
-	_Vec3&	operator/=( const T &rhs )
+	_Vec3	operator%(const _Vec3& rhs) const
+	{
+		return _Vec3(
+			y * rhs.z - z * rhs.y,
+			z * rhs.x - x * rhs.z,
+			x * rhs.y - y * rhs.x);
+	}
+	_Vec3& operator/=(const T& rhs)
 	{
 		x /= rhs;
 		y /= rhs;
 		z /= rhs;
 		return *this;
 	}
-	_Vec3& operator/=(const _Vec3& rhs)
+	_Vec3	operator/(const T& rhs) const
 	{
-		x /= rhs.x;
-		y /= rhs.y;
-		z /= rhs.z;
-		return *this;
+		return _Vec3(*this) /= rhs;
 	}
-	_Vec3	operator/( const T &rhs ) const
+	bool	operator==(const _Vec3& rhs) const
 	{
-		return _Vec3( *this ) /= rhs;
+		return x == rhs.x && y == rhs.y && rhs.z == z;
 	}
-	bool	operator==( const _Vec3 &rhs ) const
-	{
-		return x == rhs.x && y == rhs.y && rhs.z = z;
-	}
-	bool	operator!=( const _Vec3 &rhs ) const
+	bool	operator!=(const _Vec3& rhs) const
 	{
 		return !(*this == rhs);
 	}

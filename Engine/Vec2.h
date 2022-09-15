@@ -49,7 +49,7 @@ public:
 	{
 		return sqrt( LenSq() );
 	}
-	_Vec2&	Normalize()
+	_Vec2& Normalize()
 	{
 		const T length = Len();
 		x /= length;
@@ -64,76 +64,63 @@ public:
 	}
 	_Vec2	operator-() const
 	{
-		return _Vec2( -x,-y );
+		return _Vec2(-x, -y);
 	}
-	_Vec2&	operator=( const _Vec2 &rhs )
+	_Vec2& operator=(const _Vec2& rhs)
 	{
 		x = rhs.x;
 		y = rhs.y;
 		return *this;
 	}
-	_Vec2&	operator+=( const _Vec2 &rhs )
+	_Vec2& operator+=(const _Vec2& rhs)
 	{
 		x += rhs.x;
 		y += rhs.y;
 		return *this;
 	}
-	_Vec2&	operator-=( const _Vec2 &rhs )
+	_Vec2& operator-=(const _Vec2& rhs)
 	{
 		x -= rhs.x;
 		y -= rhs.y;
 		return *this;
 	}
-	T		operator*( const _Vec2 &rhs ) const
+	T		operator*(const _Vec2& rhs) const
 	{
 		return x * rhs.x + y * rhs.y;
-	}	
-	_Vec2	operator+( const _Vec2 &rhs ) const
-	{
-		return _Vec2( *this ) += rhs;
 	}
-	_Vec2	operator-( const _Vec2 &rhs ) const
+	_Vec2	operator+(const _Vec2& rhs) const
 	{
-		return _Vec2( *this ) -= rhs;
+		return _Vec2(*this) += rhs;
 	}
-	_Vec2&	operator*=( const T &rhs )
+	_Vec2	operator-(const _Vec2& rhs) const
+	{
+		return _Vec2(*this) -= rhs;
+	}
+	_Vec2& operator*=(const T& rhs)
 	{
 		x *= rhs;
 		y *= rhs;
 		return *this;
 	}
-	_Vec2& operator*=(const _Vec2& rhs)
+	_Vec2	operator*(const T& rhs) const
 	{
-		x *= rhs.x;
-		y *= rhs.y;
-		return *this;
+		return _Vec2(*this) *= rhs;
 	}
-	
-	_Vec2	operator*( const T &rhs ) const
-	{
-		return _Vec2( *this ) *= rhs;
-	}
-	_Vec2&	operator/=( const T &rhs )
+	_Vec2& operator/=(const T& rhs)
 	{
 		x /= rhs;
 		y /= rhs;
 		return *this;
 	}
-	_Vec2& operator/=(const _Vec2& rhs)
+	_Vec2	operator/(const T& rhs) const
 	{
-		x /= rhs.x;
-		y /= rhs.y;
-		return *this;
+		return _Vec2(*this) /= rhs;
 	}
-	_Vec2	operator/( const T &rhs ) const
-	{
-		return _Vec2( *this ) /= rhs;
-	}
-	bool	operator==( const _Vec2 &rhs ) const
+	bool	operator==(const _Vec2& rhs) const
 	{
 		return x == rhs.x && y == rhs.y;
 	}
-	bool	operator!=(const _Vec2 &rhs) const
+	bool	operator!=(const _Vec2& rhs) const
 	{
 		return !(*this == rhs);
 	}

@@ -671,7 +671,7 @@ void Graphics::DrawFlatBottomTriangleTexWrap(const TexVertex& v0, const TexVerte
 
 	// create right edge interpolant
 	TexVertex itEdge1 = v0;
-
+	
 	// call the flat triangle render routine
 	DrawFlatTriangleTexWrap(v0, v1, v2, tex, dv0, dv1, itEdge1);
 }
@@ -711,9 +711,10 @@ void Graphics::DrawFlatTriangleTexWrap(const TexVertex& v0, const TexVertex& v1,
 
 		for (int x = xStart; x < xEnd; x++, itcLine += dtcLine)
 		{
+			
 			PutPixel(x, y, tex.GetPixel(
-				int(std::fmod(itcLine.x * tex_width, tex_clamp_x)),
-				int(std::fmod(itcLine.y * tex_height, tex_clamp_y))));
+				int(std::fmod(itcLine.x * tex_width + tex_width, tex_width)),
+				int(std::fmod(itcLine.y * tex_height + tex_height, tex_height))));
 			// need std::min b/c tc.x/y == 1.0, we'll read off edge of tex
 			// and with fp err, tc.x/y can be > 1.0 (by a tiny amount)
 		}
