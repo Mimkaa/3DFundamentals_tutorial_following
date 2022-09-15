@@ -21,21 +21,12 @@
 #include "MainWindow.h"
 #include "Game.h"
 #include "Mat3.h"
-#include "SolidCubeScene.h"
-#include "TexCubeScene.h"
-#include "TexCubeSceneWrap.h"
-#include "FoldedCubeScene.h"
-#include "FoldedCubeWrapScene.h"
-#include "SkinnedCubeScene.h"
+#include "CubeSkinScene.h"
 #include <sstream>
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
-	scenes.push_back(std::make_unique<SolidCubeScene>());
-	scenes.push_back(std::make_unique<TexCubeScene>());
-	scenes.push_back(std::make_unique<TexWrapCubeScene>());
-	scenes.push_back(std::make_unique<FoldedCubeScene>());
-	scenes.push_back(std::make_unique<FoldedCubeWrapScene>());
-	scenes.push_back(std::make_unique<CubeSkinnedScene>(L"images\\soil.png"));
+	
+	scenes.push_back(std::make_unique<CubeSkinScene>(gfx, L"images\\soil.png"));
 	curScene = scenes.begin();
 
 }
@@ -76,5 +67,5 @@ void Game::CycleScenes()
 void Game::ComposeFrame()
 {
 	// draw scene
-	(*curScene)->Draw(gfx);
+	(*curScene)->Draw();
 }
