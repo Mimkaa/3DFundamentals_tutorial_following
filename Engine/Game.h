@@ -26,7 +26,7 @@
 #include "Scene.h"
 #include <memory>
 #include <vector>
-
+#include "FrameTimer.h"
 class Game
 {
 public:
@@ -47,7 +47,7 @@ private:
 	Graphics gfx;
 	/********************************/
 	/*  User Variables              */
-	
+	FrameTimer ft;
 	std::vector<std::unique_ptr<Scene>> scenes;
 	std::vector<std::unique_ptr<Scene>>::iterator curScene;
 	/********************************/
