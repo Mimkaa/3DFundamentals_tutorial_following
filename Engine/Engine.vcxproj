@@ -160,6 +160,8 @@
     <ClInclude Include="Rect.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SkinnedCube.h" />
+    <ClInclude Include="SkinnedCubeScene.h" />
     <ClInclude Include="SolidCubeScene.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="TexCubeScene.h" />

@@ -26,6 +26,7 @@
 #include "TexCubeSceneWrap.h"
 #include "FoldedCubeScene.h"
 #include "FoldedCubeWrapScene.h"
+#include "SkinnedCubeScene.h"
 #include <sstream>
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
@@ -34,6 +35,7 @@ Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 	scenes.push_back(std::make_unique<TexWrapCubeScene>());
 	scenes.push_back(std::make_unique<FoldedCubeScene>());
 	scenes.push_back(std::make_unique<FoldedCubeWrapScene>());
+	scenes.push_back(std::make_unique<CubeSkinnedScene>(L"images\\soil.png"));
 	curScene = scenes.begin();
 
 }
