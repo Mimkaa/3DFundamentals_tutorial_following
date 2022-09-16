@@ -22,11 +22,13 @@
 #include "Game.h"
 #include "Mat3.h"
 #include "CubeSkinScene.h"
+#include "CubeVertexColorScene.h"
 #include <sstream>
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
 	
 	scenes.push_back(std::make_unique<CubeSkinScene>(gfx, L"images\\soil.png"));
+	scenes.push_back(std::make_unique<CubeVertexColorScene>(gfx));
 	curScene = scenes.begin();
 
 }

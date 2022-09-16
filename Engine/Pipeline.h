@@ -43,7 +43,7 @@ private:
 		// transform vertices using matrix + vector
 		for (const auto& v : vertices)
 		{
-			verticesOut.emplace_back(v.pos * rotation + translation, v.t);
+			verticesOut.emplace_back(v.pos * rotation + translation, v);
 		}
 
 		// assemble triangles from stream of indices and vertices (slit)
