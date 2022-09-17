@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Zbuffer.h"
 #include "ChiliWin.h"
 #include "Graphics.h"
 #include "Triangle.h"
@@ -16,7 +16,8 @@ public:
 public:
 	Pipeline(Graphics& gfx)
 		:
-		gfx(gfx)
+		gfx(gfx),
+		zb(gfx.ScreenWidth, gfx.ScreenHeight)
 	{}
 	void Draw(IndexedTriangleList<Vertex> & trilist)
 	{
@@ -29,6 +30,11 @@ public:
 	void BindTranslation(const Vec3& translation_in)
 	{
 		translation = translation_in;
+	}
+	// needed to reset the z-buffer after each frame
+	void BeginFrame()
+	{
+		zb.Clear();
 	}
 	
 
@@ -177,7 +183,8 @@ private:
 		DrawFlatTriangle(it0, it1, it2, dit0, dit1, itEdge1);
 	}
 	// does processing common to both flat top and flat bottom tris
-	// texture lookup and pixel written here
+	// scan over triangle in screen space, interpolate attributes,
+	// depth cull, invoke ps and write pixel to screen
 	void DrawFlatTriangle(const Vertex& it0,
 		const Vertex& it1,
 		const Vertex& it2,
@@ -220,13 +227,16 @@ private:
 			{
 				// recover interpolated z from interpolated 1/z
 				const float z = 1.0f / iLine.pos.z;
-				// recover interpolated attributes
-				// (wasted effort in multiplying pos (x,y,z) here, but
-				//  not a huge deal, not worth the code complication to fix)
-				const auto attr = iLine * z;
-				// invoke pixel shader with interpolated vertex attributes
-				// and use result to set the pixel color on the screen
-				gfx.PutPixel(x, y, effect.ps(attr));
+				// skip shading step if z is  higher than the current value in the z-buffer
+				if (zb.TestAndSet(x, y, z)) {
+					// recover interpolated attributes
+					// (wasted effort in multiplying pos (x,y,z) here, but
+					//  not a huge deal, not worth the code complication to fix)
+					const auto attr = iLine * z;
+					// invoke pixel shader with interpolated vertex attributes
+					// and use result to set the pixel color on the screen
+					gfx.PutPixel(x, y, effect.ps(attr));
+				}
 			}
 		}
 	}
@@ -237,6 +247,6 @@ private:
 	PubeScreenTransformer pst;
 	Mat3 rotation;
 	Vec3 translation;
-
+	ZBuffer zb;
 
 };

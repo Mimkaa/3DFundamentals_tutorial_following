@@ -25,6 +25,7 @@
 #include "CubeVertexColorScene.h"
 #include "SolidCubeScene.h"
 #include "AnimatesTextureScene.h"
+#include "DoubleCubeScene.h"
 #include <filesystem>
 #include <sstream>
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
@@ -33,6 +34,7 @@ Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 	scenes.push_back(std::make_unique<CubeVertexColorScene>(gfx));
 	scenes.push_back(std::make_unique<CubeSolidScene>(gfx));
 	scenes.push_back(std::make_unique<AnimatedCubeSkinScene>(gfx, ScanDirectory("Images\\Uta_dance_frames")));
+	scenes.push_back(std::make_unique<DoubleCubeScene>(gfx));
 	curScene = scenes.begin();
 
 }

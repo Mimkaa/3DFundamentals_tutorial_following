@@ -57,6 +57,8 @@ public:
 	}
 	virtual void Draw() override
 	{
+		// clear z-buffer
+		pipeline.BeginFrame();
 		// generate rotation matrix from euler angles
 		// translation from offset
 		const Mat3 rot =
