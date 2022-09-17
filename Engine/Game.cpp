@@ -23,13 +23,30 @@
 #include "Mat3.h"
 #include "CubeSkinScene.h"
 #include "CubeVertexColorScene.h"
+#include "SolidCubeScene.h"
+#include "AnimatesTextureScene.h"
+#include <filesystem>
 #include <sstream>
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
-	
 	scenes.push_back(std::make_unique<CubeSkinScene>(gfx, L"images\\soil.png"));
 	scenes.push_back(std::make_unique<CubeVertexColorScene>(gfx));
+	scenes.push_back(std::make_unique<CubeSolidScene>(gfx));
+	scenes.push_back(std::make_unique<AnimatedCubeSkinScene>(gfx, ScanDirectory("Images\\Uta_dance_frames")));
 	curScene = scenes.begin();
+
+}
+
+std::vector<std::wstring> Game::ScanDirectory(const char* dirname)
+{
+	std::vector<std::wstring> names;
+	for (const auto& entry : std::filesystem::directory_iterator(dirname))
+	{
+		auto path = entry.path();
+		names.emplace_back(path.wstring());
+	}
+		
+	return names;
 
 }
 

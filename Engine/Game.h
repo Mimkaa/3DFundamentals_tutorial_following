@@ -40,6 +40,7 @@ private:
 	/********************************/
 	/*  User Functions              */
 	void CycleScenes();
+	std::vector<std::wstring> ScanDirectory(const char* dirname);
 
 	/********************************/
 private:
