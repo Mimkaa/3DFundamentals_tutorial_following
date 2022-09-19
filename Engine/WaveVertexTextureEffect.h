@@ -1,13 +1,10 @@
 #pragma once
 
 #include "Pipeline.h"
-#include "DefaultVertexShader.h"
 #include "DefaultGeometryShader.h"
-// basic texture effect
-class VertexColorEffect
+class WaveVertexTextureEffect
 {
 public:
-	// the vertex type that will be input into the pipeline
 	class Vertex
 	{
 	public:
@@ -18,18 +15,18 @@ public:
 		{}
 		Vertex(const Vec3& pos, const Vertex& src)
 			:
-			color(src.color),
+			t(src.t),
 			pos(pos)
 		{}
-		Vertex(const Vec3& pos, const Vec3& t)
+		Vertex(const Vec3& pos, const Vec2& t)
 			:
-			color(t),
+			t(t),
 			pos(pos)
 		{}
 		Vertex& operator+=(const Vertex& rhs)
 		{
 			pos += rhs.pos;
-			color += rhs.color;
+			t += rhs.t;
 			return *this;
 		}
 		Vertex operator+(const Vertex& rhs) const
@@ -39,7 +36,7 @@ public:
 		Vertex& operator-=(const Vertex& rhs)
 		{
 			pos -= rhs.pos;
-			color -= rhs.color;
+			t -= rhs.t;
 			return *this;
 		}
 		Vertex operator-(const Vertex& rhs) const
@@ -49,7 +46,7 @@ public:
 		Vertex& operator*=(float rhs)
 		{
 			pos *= rhs;
-			color *= rhs;
+			t *= rhs;
 			return *this;
 		}
 		Vertex operator*(float rhs) const
@@ -59,7 +56,7 @@ public:
 		Vertex& operator/=(float rhs)
 		{
 			pos /= rhs;
-			color /= rhs;
+			t /= rhs;
 			return *this;
 		}
 		Vertex operator/(float rhs) const
@@ -68,23 +65,53 @@ public:
 		}
 	public:
 		Vec3 pos;
-		Vec3 color;
+		Vec2 t;
 	};
-	typedef DefaultVertexShader<Vertex> VertexShader;
+	// perturbes vertices in y axis in sin wave based on
+	// x position and time
+	class VertexShader
+	{
+	public:
+		typedef Vertex Output;
+	public:
+		void BindRotation(const Mat3& rotation_in)
+		{
+			rotation = rotation_in;
+		}
+		void BindTranslation(const Vec3& translation_in)
+		{
+			translation = translation_in;
+		}
+		Output operator()(const Vertex& in) const
+		{
+			Vec3 pos = in.pos * rotation + translation;
+			pos.y += amplitude * sinf(time * freqScroll + pos.x * freqWave);
+			return{ pos,in.t };
+		}
+		void SetTime(float t)
+		{
+			time = t;
+		}
+	private:
+		Mat3 rotation;
+		Vec3 translation;
+		float time = 0.0f;
+		float freqWave = 10.0f;
+		float freqScroll = 5.0f;
+		float amplitude = 0.05f;
+	};
 	typedef DefaultGeometryShader<VertexShader::Output> GeometryShader;
-	// invoked for each pixel of a triangle
-	// takes an input of attributes that are the
-	// result of interpolating vertex attributes
-	// and outputs a color , (it is a functor(a class that acts like a function))
+	// texture clamped ps
 	class PixelShader
 	{
 	public:
 		template<class Input>
 		Color operator()(const Input& in) const
 		{
-			
-			return Color(in.color);
-			
+			return pTex->GetPixel(
+				(unsigned int)std::min(in.t.x * tex_width + 0.5f, tex_xclamp),
+				(unsigned int)std::min(in.t.y * tex_height + 0.5f, tex_yclamp)
+			);
 		}
 		void BindTexture(const std::wstring& filename)
 		{
@@ -102,8 +129,7 @@ public:
 		float tex_yclamp;
 	};
 public:
-	PixelShader ps;
 	VertexShader vs;
+	PixelShader ps;
 	GeometryShader gs;
 };
-

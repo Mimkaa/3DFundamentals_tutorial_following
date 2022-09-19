@@ -149,6 +149,8 @@
     <ClInclude Include="Cube.h" />
     <ClInclude Include="CubeSkinScene.h" />
     <ClInclude Include="CubeVertexColorScene.h" />
+    <ClInclude Include="CubeVertexPositionColorScene.h" />
+    <ClInclude Include="DefaultGeometryShader.h" />
     <ClInclude Include="DefaultVertexShader.h" />
     <ClInclude Include="DoubleCubeScene.h" />
     <ClInclude Include="DXErr.h" />
@@ -164,18 +166,24 @@
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="MyTimer.h" />
     <ClInclude Include="Pipeline.h" />
+    <ClInclude Include="Plane.h" />
     <ClInclude Include="PubeScreenTransformer.h" />
     <ClInclude Include="Rect.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SolidCobeGeometryScene.h" />
     <ClInclude Include="SolidCubeEffect.h" />
     <ClInclude Include="SolidCubeScene.h" />
+    <ClInclude Include="SolidGeometryEffect.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="TextureEffect.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vec2.h" />
     <ClInclude Include="Vec3.h" />
     <ClInclude Include="VertexColorEffect.h" />
+    <ClInclude Include="VertexPositionColorEffect.h" />
+    <ClInclude Include="VertexWaveScene.h" />
+    <ClInclude Include="WaveVertexTextureEffect.h" />
     <ClInclude Include="Zbuffer.h" />
   </ItemGroup>
   <ItemGroup>
