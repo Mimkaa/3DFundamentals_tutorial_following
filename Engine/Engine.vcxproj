@@ -170,6 +170,8 @@
     <ClInclude Include="PubeScreenTransformer.h" />
     <ClInclude Include="Rect.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="RotatingFaceScene.h" />
+    <ClInclude Include="RotatingFacesEffect.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SolidCobeGeometryScene.h" />
     <ClInclude Include="SolidCubeEffect.h" />

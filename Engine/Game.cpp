@@ -29,10 +29,12 @@
 #include "VertexWaveScene.h"
 #include "CubeVertexPositionColorScene.h"
 #include "SolidCobeGeometryScene.h"
+#include "RotatingFaceScene.h"
 #include <filesystem>
 #include <sstream>
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
+	scenes.push_back(std::make_unique<RotatingFacesScene>(gfx));
 	scenes.push_back(std::make_unique<CubeSkinScene>(gfx, L"images\\soil.png"));
 	scenes.push_back(std::make_unique<CubeVertexColorScene>(gfx));
 	scenes.push_back(std::make_unique<CubeSolidScene>(gfx));
@@ -41,6 +43,7 @@ Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 	scenes.push_back(std::make_unique<VertexWaveScene>(gfx));
 	scenes.push_back(std::make_unique<CubeVertexPositionColorScene>(gfx));
 	scenes.push_back(std::make_unique<CubeSolidGeometryScene>(gfx));
+	
 	curScene = scenes.begin();
 
 }

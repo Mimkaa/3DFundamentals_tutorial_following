@@ -135,5 +135,6 @@ _Vec3<T> operator*( const _Vec3<T>& lhs,const _Mat3<T>& rhs )
 	};
 }
 
+
 typedef _Mat3<float> Mat3;
 typedef _Mat3<double> Mad3;

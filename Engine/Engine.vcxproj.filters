@@ -153,6 +153,12 @@
     <ClInclude Include="SolidCobeGeometryScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RotatingFacesEffect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RotatingFaceScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXErr.cpp">

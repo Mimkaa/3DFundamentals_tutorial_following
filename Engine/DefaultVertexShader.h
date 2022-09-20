@@ -18,7 +18,12 @@ public:
 	{
 		return{ in.pos * rotation + translation,in };
 	}
+	const Mat3 get_rotation() const
+	{
+		return rotation;
+	}
 private:
 	Mat3 rotation;
 	Vec3 translation;
+
 };
