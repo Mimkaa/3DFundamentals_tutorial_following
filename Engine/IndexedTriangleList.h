@@ -4,6 +4,7 @@
 #include "Vec3.h"
 #include "tiny_object_loader.h"
 #include <fstream>
+#include "Miniball.h"
 #include <cctype>
 
 template <typename T>
@@ -98,6 +99,40 @@ struct IndexedTriangleList
 		}
 
 		return tl;
+	}
+
+	void AdjustToTrueCenter()
+	{
+		// used to enable miniball to access vertex pos info
+		struct VertexAccessor
+		{
+			typedef std::vector<T>::const_iterator Pit;
+			typedef const float* Cit;
+			Cit operator()(Pit it) const
+			{
+				return &it->pos.x;
+			}
+		};
+
+		// solve the minimum bounding sphere
+		Miniball::Miniball<VertexAccessor> mb(3, vertices.cbegin(), vertices.cend());
+		// result is a pointer to float[3] (what a shitty fuckin interface)
+		const auto pc = mb.center();
+		const Vec3 center = { *pc,*std::next(pc),*std::next(pc,2) };
+		// adjust all vertices so that center of minimal sphere is at 0,0
+		for (auto& v : vertices)
+		{
+			v.pos -= center;
+		}
+	}
+	float GetRadius() const
+	{
+		return std::max_element(vertices.begin(), vertices.end(),
+			[](const T& v0, const T& v1)
+		{
+			return v0.pos.LenSq() < v1.pos.LenSq();
+		}
+		)->pos.Len();
 	}
 	
 	std::vector<T> vertices;
