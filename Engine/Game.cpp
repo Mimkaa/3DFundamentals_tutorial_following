@@ -29,11 +29,17 @@
 #include "VertexWaveScene.h"
 #include "CubeVertexPositionColorScene.h"
 #include "SolidCobeGeometryScene.h"
+#include "CubeFlatIndependentLighting.h"
 #include "RotatingFaceScene.h"
+#include "GeometryFlatScene.h"
 #include <filesystem>
 #include <sstream>
+
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
+
+	scenes.push_back(std::make_unique<GeometryFlatScene>(gfx, IndexedTriangleList<GeometryFlatScene::Vertex>::Load("models\\model.obj")));
+	scenes.push_back(std::make_unique<CubeFlatIndependentScene>(gfx));
 	scenes.push_back(std::make_unique<RotatingFacesScene>(gfx));
 	scenes.push_back(std::make_unique<CubeSkinScene>(gfx, L"images\\soil.png"));
 	scenes.push_back(std::make_unique<CubeVertexColorScene>(gfx));
