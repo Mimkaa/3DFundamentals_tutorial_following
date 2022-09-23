@@ -6,6 +6,7 @@
 #include <fstream>
 #include "Miniball.h"
 #include <cctype>
+#include <cmath>
 
 template <typename T>
 struct IndexedTriangleList
@@ -19,6 +20,73 @@ struct IndexedTriangleList
 		assert(vertices.size() > 2);
 		assert(indices.size() % 3 == 0);
 		cullFlags.resize(indices.size() / 3, false);
+	}
+	static std::vector<std::string> split(const std::string& line, const std::string& dilimeter)
+	{
+		std::vector<std::string> result;
+		size_t last_ind = 0;
+		size_t current_ind = 0;
+		while (true)
+		{
+			current_ind = line.find(dilimeter, last_ind);
+
+			if (current_ind == std::string::npos)
+			{
+				current_ind = line.length();
+			}
+			if (last_ind > current_ind)
+			{
+				last_ind = current_ind;
+			}
+
+			std::string sub = line.substr(last_ind, current_ind - last_ind);
+			if (sub.empty())
+			{
+				break;
+			}
+			result.push_back(sub);
+
+			last_ind = current_ind + dilimeter.length();
+		}
+		return result;
+	}
+	static float floatFormENumStr(const std::string& doub)
+	{
+		size_t emark = doub.find("e");
+		float mainNum = std::stof(doub.substr(0, emark));
+		int power = std::stoi(doub.substr(emark + 1, doub.length() - emark));
+		float fin = mainNum * pow(10, power);
+		return fin;
+	}
+
+	static IndexedTriangleList<T> LoadMyVersion(const std::string& filename)
+	{
+		IndexedTriangleList<T> tl;
+		std::ifstream file(filename);
+		std::string line;
+		while (getline(file,line)) 
+		{
+			if (line[0] == 'v')
+			{
+				auto verts = split(line.substr(2, line.length()-2), " ");
+				tl.vertices.emplace_back(Vec3{
+					floatFormENumStr(verts[0]),
+					floatFormENumStr(verts[1]),
+					floatFormENumStr(verts[2]) }
+				);
+			}
+			else if (line[0] == 'f')
+			{
+				auto inds = split(line.substr(2, line.length() - 2), " ");
+				for (auto& i : inds)
+				{
+					tl.indices.push_back((size_t)std::stoi(i)-1);
+
+				}
+				
+			}
+		}
+		return tl;
 	}
 
 	static IndexedTriangleList<T> Load(const std::string& filename)

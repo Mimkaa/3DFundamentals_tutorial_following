@@ -38,6 +38,7 @@
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
 
+	scenes.push_back(std::make_unique<GeometryFlatScene>(gfx, IndexedTriangleList<GeometryFlatScene::Vertex>::LoadMyVersion("models\\model.obj")));
 	scenes.push_back(std::make_unique<GeometryFlatScene>(gfx, IndexedTriangleList<GeometryFlatScene::Vertex>::Load("models\\model.obj")));
 	scenes.push_back(std::make_unique<CubeFlatIndependentScene>(gfx));
 	scenes.push_back(std::make_unique<RotatingFacesScene>(gfx));
