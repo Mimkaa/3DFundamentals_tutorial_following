@@ -32,12 +32,14 @@
 #include "CubeFlatIndependentLighting.h"
 #include "RotatingFaceScene.h"
 #include "GeometryFlatScene.h"
+#include "SphereScene.h"
 #include <filesystem>
 #include <sstream>
+#include "Sphere.h"
 
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
-
+	scenes.push_back(std::make_unique<SphereScene>(gfx, Sphere::GetPlain<GeometryFlatScene::Vertex>(20,20,1.0f)));
 	scenes.push_back(std::make_unique<GeometryFlatScene>(gfx, IndexedTriangleList<GeometryFlatScene::Vertex>::LoadMyVersion("models\\model.obj")));
 	scenes.push_back(std::make_unique<GeometryFlatScene>(gfx, IndexedTriangleList<GeometryFlatScene::Vertex>::Load("models\\model.obj")));
 	scenes.push_back(std::make_unique<CubeFlatIndependentScene>(gfx));
