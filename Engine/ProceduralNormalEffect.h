@@ -4,8 +4,8 @@
 #include "DefaultVertexShader.h"
 #include "DefaultGeometryShader.h"
 
-// flat shading with vertex normals
-class GouraudEffect
+// flat shading with face normals calculated in gs
+class ProceduralNormalEffect
 {
 public:
 	// the vertex type that will be input into the pipeline
@@ -19,18 +19,11 @@ public:
 		{}
 		Vertex(const Vec3& pos, const Vertex& src)
 			:
-			n(src.n),
-			pos(pos)
-		{}
-		Vertex(const Vec3& pos, const Vec3& n)
-			:
-			n(n),
 			pos(pos)
 		{}
 		Vertex& operator+=(const Vertex& rhs)
 		{
 			pos += rhs.pos;
-
 			return *this;
 		}
 		Vertex operator+(const Vertex& rhs) const
@@ -40,7 +33,6 @@ public:
 		Vertex& operator-=(const Vertex& rhs)
 		{
 			pos -= rhs.pos;
-
 			return *this;
 		}
 		Vertex operator-(const Vertex& rhs) const
@@ -50,7 +42,6 @@ public:
 		Vertex& operator*=(float rhs)
 		{
 			pos *= rhs;
-
 			return *this;
 		}
 		Vertex operator*(float rhs) const
@@ -60,7 +51,6 @@ public:
 		Vertex& operator/=(float rhs)
 		{
 			pos /= rhs;
-
 			return *this;
 		}
 		Vertex operator/(float rhs) const
@@ -69,11 +59,13 @@ public:
 		}
 	public:
 		Vec3 pos;
-		Vec3 n;
 	};
-	// calculate color based on normal to light angle
-	// no interpolation of color attribute
-	class VertexShader
+	// default vs rotates and translates vertices
+	// does not touch attributes
+	typedef DefaultVertexShader<Vertex> VertexShader;
+	// calculate color based on face normal calculated from
+	// cross product of geometry--no interpolation of color
+	class GeometryShader
 	{
 	public:
 		class Output
@@ -89,7 +81,7 @@ public:
 				color(src.color),
 				pos(pos)
 			{}
-			Output(const Vec3& pos, const Color& color)
+			Output(const Vec3& pos, const Vec3& color)
 				:
 				color(color),
 				pos(pos)
@@ -116,8 +108,8 @@ public:
 			}
 			Output& operator*=(float rhs)
 			{
-				pos *= rhs;
 				color *= rhs;
+				pos *= rhs;
 				return *this;
 			}
 			Output operator*(float rhs) const
@@ -126,8 +118,8 @@ public:
 			}
 			Output& operator/=(float rhs)
 			{
-				pos /= rhs;
 				color /= rhs;
+				pos /= rhs;
 				return *this;
 			}
 			Output operator/(float rhs) const
@@ -139,21 +131,15 @@ public:
 			Vec3 color;
 		};
 	public:
-		void BindRotation(const Mat3& rotation_in)
+		Triangle<Output> operator()(const VertexShader::Output& in0, const VertexShader::Output& in1, const VertexShader::Output& in2, size_t triangle_index) const
 		{
-			rotation = rotation_in;
-		}
-		void BindTranslation(const Vec3& translation_in)
-		{
-			translation = translation_in;
-		}
-		Output operator()(const Vertex& v) const
-		{
+			// calculate face normal
+			const auto n = ((in1.pos - in0.pos) % (in2.pos - in0.pos)).GetNormalized();
 			// calculate intensity based on angle of incidence
-			const auto d = diffuse * std::max(0.0f, -(v.n * rotation) * dir);
+			const auto d = diffuse * std::max(0.0f, -n * dir);
 			// add diffuse+ambient, filter by material color, saturate and scale
 			const auto c = color.GetHadamard(d + ambient).Saturate() * 255.0f;
-			return{ v.pos * rotation + translation,Color(c) };
+			return{ {in0.pos,c},{in1.pos,c},{in2.pos,c} };
 		}
 		void SetDiffuseLight(const Vec3& c)
 		{
@@ -176,15 +162,10 @@ public:
 		Mat3 rotation;
 		Vec3 translation;
 		Vec3 dir = { 0.0f,0.0f,1.0f };
-		// color of direct light
 		Vec3 diffuse = { 1.0f,1.0f,1.0f };
-		// indirect light
 		Vec3 ambient = { 0.1f,0.1f,0.1f };
-		// how much of each channel is reflected
 		Vec3 color = { 0.8f,0.85f,1.0f };
 	};
-	// default gs passes vertices through and outputs triangle
-	typedef DefaultGeometryShader<VertexShader::Output> GeometryShader;
 	// invoked for each pixel of a triangle
 	// takes an input of attributes that are the
 	// result of interpolating vertex attributes
@@ -195,7 +176,7 @@ public:
 		template<class Input>
 		Color operator()(const Input& in) const
 		{
-			return Color(in.color);
+			return Color(in.color );
 		}
 	};
 public:
@@ -203,4 +184,3 @@ public:
 	GeometryShader gs;
 	PixelShader ps;
 };
-

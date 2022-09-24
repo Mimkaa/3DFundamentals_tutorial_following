@@ -30,17 +30,25 @@
 #include "CubeVertexPositionColorScene.h"
 #include "SolidCobeGeometryScene.h"
 #include "CubeFlatIndependentLighting.h"
+#include "ProceduralNormalScene.h"
+#include "SmoothBunnyScene.h"
 #include "RotatingFaceScene.h"
 #include "GeometryFlatScene.h"
 #include "SphereScene.h"
+#include "GouraudScene.h"
 #include <filesystem>
 #include <sstream>
 #include "Sphere.h"
 
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
-	scenes.push_back(std::make_unique<SphereScene>(gfx, Sphere::GetPlain<GeometryFlatScene::Vertex>(20,20,1.0f)));
+	scenes.push_back(std::make_unique<SmooothBunnyScene>(gfx, IndexedTriangleList<SmooothBunnyScene::Vertex>::GeneratedNormals("models\\model.obj")));
 	scenes.push_back(std::make_unique<GeometryFlatScene>(gfx, IndexedTriangleList<GeometryFlatScene::Vertex>::LoadMyVersion("models\\model.obj")));
+	scenes.push_back(std::make_unique<GouraudScene>(gfx, IndexedTriangleList<GouraudScene::Vertex>::LoadNormals("models\\suzanne.obj")));
+	scenes.push_back(std::make_unique<GouraudScene>(gfx, Sphere::GetPlainNormals<GouraudScene::Vertex>(20, 20, 1.0f)));
+	scenes.push_back(std::make_unique<SphereScene>(gfx, Sphere::GetPlain<GeometryFlatScene::Vertex>(20, 20, 1.0f)));
+	scenes.push_back(std::make_unique<SphereScene>(gfx, Sphere::GetPlain<GeometryFlatScene::Vertex>(20,20,1.0f)));
+	
 	scenes.push_back(std::make_unique<GeometryFlatScene>(gfx, IndexedTriangleList<GeometryFlatScene::Vertex>::Load("models\\model.obj")));
 	scenes.push_back(std::make_unique<CubeFlatIndependentScene>(gfx));
 	scenes.push_back(std::make_unique<RotatingFacesScene>(gfx));

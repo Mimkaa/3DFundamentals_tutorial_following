@@ -92,7 +92,7 @@ public:
 	static IndexedTriangleList<V> GetPlainNormals(unsigned int latdivs, unsigned int longdivs, float radius)
 	{
 		auto sphere = GetPlain<V>(latdivs, longdivs, radius);
-		for (auto& v : sphere.verticies)
+		for (auto& v : sphere.vertices)
 		{
 			v.n = v.pos.GetNormalized();
 		}

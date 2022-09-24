@@ -161,6 +161,7 @@
     <ClInclude Include="GeometryFlatEffect.h" />
     <ClInclude Include="GeometryFlatScene.h" />
     <ClInclude Include="GouraudEffect.h" />
+    <ClInclude Include="GouraudScene.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="IndexedTriangleList.h" />
     <ClInclude Include="Keyboard.h" />
@@ -172,12 +173,15 @@
     <ClInclude Include="MyTimer.h" />
     <ClInclude Include="Pipeline.h" />
     <ClInclude Include="Plane.h" />
+    <ClInclude Include="ProceduralNormalEffect.h" />
+    <ClInclude Include="ProceduralNormalScene.h" />
     <ClInclude Include="PubeScreenTransformer.h" />
     <ClInclude Include="Rect.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RotatingFaceScene.h" />
     <ClInclude Include="RotatingFacesEffect.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SmoothBunnyScene.h" />
     <ClInclude Include="SolidCobeGeometryScene.h" />
     <ClInclude Include="SolidCubeEffect.h" />
     <ClInclude Include="SolidCubeScene.h" />
