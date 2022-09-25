@@ -198,6 +198,12 @@
     <ClInclude Include="SmoothBunnyScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GouraudPointLightEffect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GouraudPointLightScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXErr.cpp">

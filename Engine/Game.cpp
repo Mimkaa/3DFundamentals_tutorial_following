@@ -34,6 +34,7 @@
 #include "SmoothBunnyScene.h"
 #include "RotatingFaceScene.h"
 #include "GeometryFlatScene.h"
+#include "GouraudPointLightScene.h"
 #include "SphereScene.h"
 #include "GouraudScene.h"
 #include <filesystem>
@@ -42,6 +43,7 @@
 
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
+	scenes.push_back(std::make_unique<GouraudPointLightScene>(gfx, IndexedTriangleList<GouraudPointLightScene::Vertex>::LoadNormals("models\\suzanne.obj")));
 	scenes.push_back(std::make_unique<SmooothBunnyScene>(gfx, IndexedTriangleList<SmooothBunnyScene::Vertex>::GeneratedNormals("models\\model.obj")));
 	scenes.push_back(std::make_unique<GeometryFlatScene>(gfx, IndexedTriangleList<GeometryFlatScene::Vertex>::LoadMyVersion("models\\model.obj")));
 	scenes.push_back(std::make_unique<GouraudScene>(gfx, IndexedTriangleList<GouraudScene::Vertex>::LoadNormals("models\\suzanne.obj")));
