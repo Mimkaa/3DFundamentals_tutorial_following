@@ -151,7 +151,7 @@ public:
 			const float attenuation = 1.0f /
 				(constant_attenuation + linear_attenuation * dist + quadratic_attenuation * sq(dist));
 			// calculate intensity based on angle of incidence
-			const auto d = light_diffuse * attenuation * std::max(0.0f, in.n  * LightDir);
+			const auto d = light_diffuse * attenuation * std::max(0.0f, in.n.GetNormalized() * LightDir);
 			// add diffuse+ambient, filter by material color, saturate and scale
 			const auto c = material_color.GetHadamard(d + light_ambient).Saturate() * 255.0f;
 			return (Color(c));
