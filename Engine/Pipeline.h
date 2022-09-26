@@ -7,6 +7,7 @@
 #include "PubeScreenTransformer.h"
 #include "Mat3.h"
 #include <algorithm>
+#include <memory>
 
 template<class Effect>
 class Pipeline 
@@ -16,11 +17,20 @@ public:
 	typedef typename Effect::VertexShader::Output VSOut;
 	typedef typename Effect::GeometryShader::Output GSOut;
 public:
+public:
 	Pipeline(Graphics& gfx)
 		:
+		Pipeline(gfx, std::make_shared<ZBuffer>(gfx.ScreenWidth, gfx.ScreenHeight))
+	{
+		assert(pZb->height == gfx.ScreenHeight && pZb->width == gfx.ScreenWidth);
+	}
+	Pipeline(Graphics& gfx, std::shared_ptr<ZBuffer> pZb)
+		:
 		gfx(gfx),
-		zb(gfx.ScreenWidth, gfx.ScreenHeight)
-	{}
+		pZb(std::move(pZb))
+	{
+
+	}
 	void Draw(IndexedTriangleList<Vertex> & trilist)
 	{
 		ProcessVertices(trilist.vertices, trilist.indices);
@@ -36,8 +46,7 @@ public:
 	// needed to reset the z-buffer after each frame
 	void BeginFrame()
 	{
-		zb.Clear();
-		
+		pZb->Clear();
 	}
 	
 
@@ -228,7 +237,8 @@ private:
 				// recover interpolated z from interpolated 1/z
 				const float z = 1.0f / iLine.pos.z;
 				// skip shading step if z is  higher than the current value in the z-buffer
-				if (zb.TestAndSet(x, y, z)) {
+				if (pZb->TestAndSet(x, y, z)) 
+				{
 					// recover interpolated attributes
 					// (wasted effort in multiplying pos (x,y,z) here, but
 					//  not a huge deal, not worth the code complication to fix)
@@ -247,6 +257,6 @@ private:
 	PubeScreenTransformer pst;
 	Mat3 rotation;
 	Vec3 translation;
-	ZBuffer zb;
+	std::shared_ptr<ZBuffer> pZb;
 	
 };

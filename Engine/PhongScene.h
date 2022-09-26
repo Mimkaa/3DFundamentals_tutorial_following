@@ -4,19 +4,19 @@
 #include "Cube.h"
 #include "Mat3.h"
 #include "Pipeline.h"
-#include "GouraudPointLightEffect.h"
+#include "PhongEffect.h"
 #include "Sphere.h"
 #include "SolidCubeEffect.h"
 
-class GouraudPointLightScene : public Scene
+class PhongScene : public Scene
 {
 public:
 	// :: was used to access the global scope 
-	typedef ::Pipeline<GouraudPointLightEffect> Pipeline;
+	typedef ::Pipeline<PhongEffect> Pipeline;
 	typedef ::Pipeline<SolidEffect> PipelineLight;
 	typedef Pipeline::Vertex Vertex;
 public:
-	GouraudPointLightScene(Graphics& gfx, IndexedTriangleList<Vertex> it)
+	PhongScene(Graphics& gfx, IndexedTriangleList<Vertex> it)
 		:
 		pZb(std::make_shared<ZBuffer>(gfx.ScreenWidth, gfx.ScreenHeight)),
 		itlist(std::move(it)),
@@ -100,23 +100,23 @@ public:
 			Mat3::RotationX(theta_x) *
 			Mat3::RotationY(theta_y) *
 			Mat3::RotationZ(theta_z);
-	
+
 		const Vec3 trans = { 0.0f,0.0f,offset_z };
 		// set pipeline transform
 		pipeline.effect.vs.BindRotation(rot);
 		pipeline.effect.vs.BindTranslation(trans);
-		pipeline.effect.vs.SetLightPosition({ loffset_x,loffset_y,loffset_z });
+		pipeline.effect.ps.SetLightPosition({ loffset_x,loffset_y,loffset_z });
 		//pipeline.effect.vs.SetLightPosition(light_pos);
 		// render triangles
 		pipeline.Draw(itlist);
 
 
-		
+
 		const Vec3 transLight = { loffset_x,loffset_y,loffset_z };
 		// set pipeline transform
 		Lightpipeline.effect.vs.BindRotation(Mat3::Identity());
 		Lightpipeline.effect.vs.BindTranslation(transLight);
-		//Lightpipeline.effect.vs.SetLightPosition({ loffset_x,loffset_y,loffset_z });
+		
 		//pipeline.effect.vs.SetLightPosition(light_pos);
 		// render triangles
 		Lightpipeline.Draw(itlistLightPoint);
@@ -137,5 +137,4 @@ private:
 	float loffset_z = 0.5f;
 	Vec3 light_pos = { loffset_x,loffset_y,loffset_z };
 };
-
 

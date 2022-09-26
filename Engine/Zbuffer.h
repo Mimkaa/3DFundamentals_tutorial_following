@@ -50,9 +50,10 @@ public:
 		}
 		return false;
 	}
-private:
+public:
 	int width;
 	int height;
+private:
 	float* pBuffer = nullptr;
 };
 

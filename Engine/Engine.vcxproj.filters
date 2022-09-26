@@ -204,6 +204,12 @@
     <ClInclude Include="GouraudPointLightScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PhongEffect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PhongScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXErr.cpp">

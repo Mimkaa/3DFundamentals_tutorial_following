@@ -3,9 +3,10 @@
 #include "Pipeline.h"
 #include "DefaultVertexShader.h"
 #include "DefaultGeometryShader.h"
+#include "SolidCubeEffect.h"
 
 // flat shading with vertex normals
-class GouraudPointLightEffect
+class PhongEffect
 {
 public:
 	// the vertex type that will be input into the pipeline
@@ -27,46 +28,6 @@ public:
 			n(n),
 			pos(pos)
 		{}
-		Vertex& operator+=(const Vertex& rhs)
-		{
-			pos += rhs.pos;
-
-			return *this;
-		}
-		Vertex operator+(const Vertex& rhs) const
-		{
-			return Vertex(*this) += rhs;
-		}
-		Vertex& operator-=(const Vertex& rhs)
-		{
-			pos -= rhs.pos;
-
-			return *this;
-		}
-		Vertex operator-(const Vertex& rhs) const
-		{
-			return Vertex(*this) -= rhs;
-		}
-		Vertex& operator*=(float rhs)
-		{
-			pos *= rhs;
-
-			return *this;
-		}
-		Vertex operator*(float rhs) const
-		{
-			return Vertex(*this) *= rhs;
-		}
-		Vertex& operator/=(float rhs)
-		{
-			pos /= rhs;
-
-			return *this;
-		}
-		Vertex operator/(float rhs) const
-		{
-			return Vertex(*this) /= rhs;
-		}
 	public:
 		Vec3 pos;
 		Vec3 n;
@@ -86,18 +47,21 @@ public:
 			{}
 			Output(const Vec3& pos, const Output& src)
 				:
-				color(src.color),
+				n(src.n),
+				worldPos(src.worldPos),
 				pos(pos)
 			{}
-			Output(const Vec3& pos, const Vec3& color)
+			Output(const Vec3& pos, const Vec3& n, const Vec3& worldPos)
 				:
-				color(color),
+				worldPos(worldPos),
+				n(n),
 				pos(pos)
 			{}
 			Output& operator+=(const Output& rhs)
 			{
 				pos += rhs.pos;
-				color += rhs.color;
+				n += rhs.n;
+				worldPos += rhs.worldPos;
 				return *this;
 			}
 			Output operator+(const Output& rhs) const
@@ -107,7 +71,8 @@ public:
 			Output& operator-=(const Output& rhs)
 			{
 				pos -= rhs.pos;
-				color -= rhs.color;
+				n -= rhs.n;
+				worldPos -= rhs.worldPos;
 				return *this;
 			}
 			Output operator-(const Output& rhs) const
@@ -117,7 +82,8 @@ public:
 			Output& operator*=(float rhs)
 			{
 				pos *= rhs;
-				color *= rhs;
+				n *= rhs;
+				worldPos *= rhs;
 				return *this;
 			}
 			Output operator*(float rhs) const
@@ -127,7 +93,8 @@ public:
 			Output& operator/=(float rhs)
 			{
 				pos /= rhs;
-				color /= rhs;
+				n /= rhs;
+				worldPos /= rhs;
 				return *this;
 			}
 			Output operator/(float rhs) const
@@ -136,7 +103,9 @@ public:
 			}
 		public:
 			Vec3 pos;
-			Vec3 color;
+			// pristine word position
+			Vec3 worldPos;
+			Vec3 n;
 		};
 	public:
 		void BindRotation(const Mat3& rotation_in)
@@ -151,8 +120,29 @@ public:
 		{
 			// apply transformations to world space
 			const auto pos = v.pos * rotation + translation;
+			// first one will be distorted by pubeSpace transformer
+			return{ pos, v.n, pos };
+		}
+		
+	private:
+		Mat3 rotation;
+		Vec3 translation;
+		
+	};
+	// default gs passes vertices through and outputs triangle
+	typedef DefaultGeometryShader<VertexShader::Output> GeometryShader;
+	// invoked for each pixel of a triangle
+	// takes an input of attributes that are the
+	// result of interpolating vertex attributes
+	// and outputs a color
+	class PixelShader
+	{
+	public:
+		template<class Input>
+		Color operator()(const Input& in) const
+		{
 			// get light direction
-			const auto v_to_l = light_pos - pos;
+			const auto v_to_l = light_pos - in.worldPos;
 			const auto dist = v_to_l.Len();
 			// opposite of what it is supposed to be
 			//not to multiply by minus normal
@@ -161,10 +151,10 @@ public:
 			const float attenuation = 1.0f /
 				(constant_attenuation + linear_attenuation * dist + quadratic_attenuation * sq(dist));
 			// calculate intensity based on angle of incidence
-			const auto d = light_diffuse * attenuation * std::max(0.0f, (v.n * rotation) * LightDir);
+			const auto d = light_diffuse * attenuation * std::max(0.0f, -in.n  * LightDir);
 			// add diffuse+ambient, filter by material color, saturate and scale
 			const auto c = material_color.GetHadamard(d + light_ambient).Saturate() * 255.0f;
-			return{ pos, c };
+			return (Color(c));
 		}
 		void SetDiffuseLight(const Vec3& c)
 		{
@@ -184,8 +174,7 @@ public:
 			material_color = Vec3(c);
 		}
 	private:
-		Mat3 rotation;
-		Vec3 translation;
+		
 		Vec3 light_pos = { 0.0f,0.0f, 0.5f };
 		// color of direct light
 		Vec3 light_diffuse = { 1.0f,1.0f,1.0f };
@@ -197,26 +186,10 @@ public:
 		float linear_attenuation = 1.0f;
 		float quadratic_attenuation = 1.619f;
 		float constant_attenuation = 0.382f;
-	};
-	// default gs passes vertices through and outputs triangle
-	typedef DefaultGeometryShader<VertexShader::Output> GeometryShader;
-	// invoked for each pixel of a triangle
-	// takes an input of attributes that are the
-	// result of interpolating vertex attributes
-	// and outputs a color
-	class PixelShader
-	{
-	public:
-		template<class Input>
-		Color operator()(const Input& in) const
-		{
-			return Color(in.color);
-		}
+
 	};
 public:
 	VertexShader vs;
 	GeometryShader gs;
 	PixelShader ps;
 };
-
-

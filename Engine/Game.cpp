@@ -35,14 +35,19 @@
 #include "RotatingFaceScene.h"
 #include "GeometryFlatScene.h"
 #include "GouraudPointLightScene.h"
+#include "PhongScene.h"
 #include "SphereScene.h"
 #include "GouraudScene.h"
 #include <filesystem>
 #include <sstream>
 #include "Sphere.h"
+#include "Plane.h"
 
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
+	scenes.push_back(std::make_unique<PhongScene>(gfx, IndexedTriangleList<PhongScene::Vertex>::LoadNormals("models\\suzanne.obj")));
+	scenes.push_back(std::make_unique<PhongScene>(gfx, Plane::GetNormals<PhongScene::Vertex>()));
+	scenes.push_back(std::make_unique<GouraudPointLightScene>(gfx, Plane::GetNormals<GouraudPointLightScene::Vertex>(16)));
 	scenes.push_back(std::make_unique<GouraudPointLightScene>(gfx, IndexedTriangleList<GouraudPointLightScene::Vertex>::LoadNormals("models\\suzanne.obj")));
 	scenes.push_back(std::make_unique<SmooothBunnyScene>(gfx, IndexedTriangleList<SmooothBunnyScene::Vertex>::GeneratedNormals("models\\model.obj")));
 	scenes.push_back(std::make_unique<GeometryFlatScene>(gfx, IndexedTriangleList<GeometryFlatScene::Vertex>::LoadMyVersion("models\\model.obj")));

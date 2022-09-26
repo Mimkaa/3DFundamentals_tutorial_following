@@ -12,16 +12,17 @@ public:
 	
 		// additional scope to destroy everything inside as soon as the program reaches the end of it
 		{
-			const float side = size / 2;
-			const Vec3 BottomLeft = { -side, -side, 0 };
-			const float DevidedSideLength = side / (float)divisions;
+			const float side = size / 2.0f;
+			const float DevidedSideLength = size / (float)divisions;
+			const Vec3 BottomLeft = { -side, -side, 0.0f };
+			
 
 			for (int y = 0, i = 0; y < VerticesPerDevSide; y++)
 			{
-				const float y_pos = DevidedSideLength * (float)y;
+				const float y_pos = float(y) * DevidedSideLength;
 				for (int x = 0; x < VerticesPerDevSide; x++, i++)
 				{
-					vertices[i].pos= BottomLeft + Vec3{ DevidedSideLength * (float)x, y_pos,0.0f};
+					vertices[i].pos= BottomLeft + Vec3{ float(x) * DevidedSideLength, y_pos,0.0f};
 				}
 			}
 		}
@@ -78,4 +79,17 @@ public:
 
 		return itlist;
 	}
+
+	template<class V>
+	static IndexedTriangleList<V> GetNormals(int divisions = 7, float size = 1.0f)
+	{
+		auto tl = GetPlain<V>(divisions, size);
+		for (auto& v : tl.vertices)
+		{
+			v.n = { 0.0f, 0.0f, -1.0f };
+		}
+		return tl;
+	}
+
+	
 };
