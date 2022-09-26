@@ -26,7 +26,8 @@ template <typename T>
 class _Vec3 : public _Vec2<T>
 {
 public:
-	_Vec3() {}
+	//contain indeterminate values
+	_Vec3() = default;
 	_Vec3( T x,T y,T z )
 		:
 		_Vec2( x,y ),
