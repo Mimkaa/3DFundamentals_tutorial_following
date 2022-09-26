@@ -210,6 +210,12 @@
     <ClInclude Include="PhongScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SpecularHighlightEffect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpecularHighlightScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXErr.cpp">

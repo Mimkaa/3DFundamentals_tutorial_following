@@ -190,6 +190,8 @@
     <ClInclude Include="SolidCubeEffect.h" />
     <ClInclude Include="SolidCubeScene.h" />
     <ClInclude Include="SolidGeometryEffect.h" />
+    <ClInclude Include="SpecularHighlightEffect.h" />
+    <ClInclude Include="SpecularHighlightScene.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="SphereScene.h" />
     <ClInclude Include="Surface.h" />

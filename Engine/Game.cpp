@@ -35,6 +35,7 @@
 #include "RotatingFaceScene.h"
 #include "GeometryFlatScene.h"
 #include "GouraudPointLightScene.h"
+#include "SpecularHighlightScene.h"
 #include "PhongScene.h"
 #include "SphereScene.h"
 #include "GouraudScene.h"
@@ -45,6 +46,7 @@
 
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
+	scenes.push_back(std::make_unique<SpecularHighlightScene>(gfx, IndexedTriangleList<SpecularHighlightScene::Vertex>::LoadNormals("models\\suzanne.obj")));
 	scenes.push_back(std::make_unique<PhongScene>(gfx, IndexedTriangleList<PhongScene::Vertex>::LoadNormals("models\\suzanne.obj")));
 	scenes.push_back(std::make_unique<PhongScene>(gfx, Plane::GetNormals<PhongScene::Vertex>()));
 	scenes.push_back(std::make_unique<GouraudPointLightScene>(gfx, Plane::GetNormals<GouraudPointLightScene::Vertex>(16)));
