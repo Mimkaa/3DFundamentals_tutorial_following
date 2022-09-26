@@ -1,7 +1,7 @@
 #pragma once
 #include "Scene.h"
 #include "Cube.h"
-#include "Mat3.h"
+#include "Mat.h"
 #include "Pipeline.h"
 #include "SolidCubeEffect.h"
 class DoubleCubeScene : public Scene
