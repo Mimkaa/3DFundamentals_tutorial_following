@@ -4,8 +4,8 @@
 #include "Graphics.h"
 #include "Triangle.h"
 #include "IndexedTriangleList.h"
-#include "PubeScreenTransformer.h"
-#include "Mat3.h"
+#include "NDCScreenTransformer.h"
+#include "Mat.h"
 #include <algorithm>
 #include <memory>
 
@@ -234,15 +234,16 @@ private:
 
 			for (int x = xStart; x < xEnd; x++, iLine += diLine)
 			{
-				// recover interpolated z from interpolated 1/z
-				const float z = 1.0f / iLine.pos.z;
+				
 				// skip shading step if z is  higher than the current value in the z-buffer
-				if (pZb->TestAndSet(x, y, z)) 
+				if (pZb->TestAndSet(x, y, iLine.pos.z))
 				{
+					// recover interpolated z from interpolated 1/z
+					const float w = 1.0f / iLine.pos.w;
 					// recover interpolated attributes
 					// (wasted effort in multiplying pos (x,y,z) here, but
 					//  not a huge deal, not worth the code complication to fix)
-					const auto attr = iLine * z;
+					const auto attr = iLine * w;
 					// invoke pixel shader with interpolated vertex attributes
 					// and use result to set the pixel color on the screen
 					gfx.PutPixel(x, y, effect.ps(attr));
@@ -254,7 +255,7 @@ public :
 	Effect effect;
 private:
 	Graphics& gfx;
-	PubeScreenTransformer pst;
+	NDCScreenTransformer pst;
 	Mat3 rotation;
 	Vec3 translation;
 	std::shared_ptr<ZBuffer> pZb;

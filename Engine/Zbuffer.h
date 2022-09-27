@@ -50,6 +50,10 @@ public:
 		}
 		return false;
 	}
+	auto GetMinMax() const
+	{
+		return std::minmax_element(pBuffer, pBuffer + width * height);
+	}
 public:
 	int width;
 	int height;

@@ -1,7 +1,6 @@
 #pragma once
-
 #include "Vec3.h"
-
+#include "Vec4.h"
 template <typename T, size_t S>
 class _Mat
 {
@@ -58,6 +57,7 @@ public:
 				(T)0.0,(T)0.0,(T)1.0
 			};
 		}
+		
 		else if constexpr (S == 4)
 		{
 			return {
@@ -82,6 +82,7 @@ public:
 				(T)0.0,(T)0.0,factor
 			};
 		}
+	
 		else if constexpr (S == 4)
 		{
 			return {
@@ -95,7 +96,6 @@ public:
 		{
 			static_assert(false, "Bad dimensionality");
 		}
-
 	}
 	static _Mat RotationZ(T theta)
 	{
@@ -109,6 +109,7 @@ public:
 				(T)0.0,    (T)0.0,   (T)1.0
 			};
 		}
+
 		else if constexpr (S == 4)
 		{
 			return {
@@ -135,6 +136,7 @@ public:
 				 sinTheta, (T)0.0, cosTheta
 			};
 		}
+	
 		else if constexpr (S == 4)
 		{
 			return {
@@ -161,6 +163,7 @@ public:
 				(T)0.0,-sinTheta, cosTheta,
 			};
 		}
+		
 		else if constexpr (S == 4)
 		{
 			return {
@@ -188,7 +191,23 @@ public:
 				(T)1.0,(T)0.0,(T)0.0,(T)0.0,
 				(T)0.0,(T)1.0,(T)0.0,(T)0.0,
 				(T)0.0,(T)0.0,(T)1.0,(T)0.0,
-				x     ,y     ,z     ,(T)1.0
+				x,     y,      z,    (T)1.0
+			};
+		}
+		else
+		{
+			static_assert(false, "Bad dimensionality");
+		}
+	}
+	constexpr static _Mat Projection(T w, T h, T n, T f)
+	{
+		if constexpr (S == 4)
+		{
+			return {
+				(T)2.0 * n / w,	(T)0.0,			(T)0.0,				(T)0.0,
+				(T)0.0,			(T)2.0 * n / h,	(T)0.0,				(T)0.0,
+				(T)0.0,			(T)0.0,			f / (f - n),		(T)1.0,
+				(T)0.0,			(T)0.0,			-n * f / (f - n),	(T)0.0,
 			};
 		}
 		else
@@ -200,13 +219,11 @@ public:
 	// [ row ][ col ]
 	T elements[S][S];
 };
-
 template<typename T>
 _Vec3<T>& operator*=(_Vec3<T>& lhs, const _Mat<T, 3>& rhs)
 {
 	return lhs = lhs * rhs;
 }
-
 template<typename T>
 _Vec3<T> operator*(const _Vec3<T>& lhs, const _Mat<T, 3>& rhs)
 {
@@ -221,7 +238,6 @@ _Vec4<T>& operator*=(_Vec4<T>& lhs, const _Mat<T, 4>& rhs)
 {
 	return lhs = lhs * rhs;
 }
-
 template<typename T>
 _Vec4<T> operator*(const _Vec4<T>& lhs, const _Mat<T, 4>& rhs)
 {
@@ -232,9 +248,6 @@ _Vec4<T> operator*(const _Vec4<T>& lhs, const _Mat<T, 4>& rhs)
 		lhs.x * rhs.elements[0][3] + lhs.y * rhs.elements[1][3] + lhs.z * rhs.elements[2][3] + lhs.w * rhs.elements[3][3]
 	};
 }
-
-
-
 typedef _Mat<float, 3> Mat3;
 typedef _Mat<double, 3> Mad3;
 typedef _Mat<float, 4> Mat4;

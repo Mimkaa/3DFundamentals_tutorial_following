@@ -1,22 +1,20 @@
 #pragma once
-
 #include <algorithm>
 #include "ChiliMath.h"
 #include "Vec3.h"
-
 template <typename T>
 class _Vec4 : public _Vec3<T>
 {
 public:
 	_Vec4() = default;
-	_Vec4(const _Vec3& v3, float w = 1.0f)
-		:
-		_Vec3(v3),
-		w(w)
-	{}
 	_Vec4(T x, T y, T z, T w)
 		:
 		_Vec3(x, y, z),
+		w(w)
+	{}
+	_Vec4(const _Vec3& v3, float w = 1.0f)
+		:
+		_Vec3(v3),
 		w(w)
 	{}
 	template <typename T2>
@@ -54,24 +52,24 @@ public:
 	{
 		x = rhs.x;
 		y = rhs.y;
-		w = rhs.z;
-		z = rhs.w;
+		z = rhs.z;
+		w = rhs.w;
 		return *this;
 	}
 	_Vec4& operator+=(const _Vec4& rhs)
 	{
 		x += rhs.x;
 		y += rhs.y;
-		w += rhs.z;
-		z += rhs.w;
+		z += rhs.z;
+		w += rhs.w;
 		return *this;
 	}
 	_Vec4& operator-=(const _Vec4& rhs)
 	{
 		x -= rhs.x;
 		y -= rhs.y;
-		w -= rhs.z;
-		z -= rhs.w;
+		z -= rhs.z;
+		w -= rhs.w;
 		return *this;
 	}
 	//T		operator*( const _Vec4 &rhs ) const
@@ -160,7 +158,6 @@ public:
 public:
 	T w;
 };
-
 typedef _Vec4<float> Vec4;
 typedef _Vec4<double> Ved4;
 typedef _Vec4<int> Vei4;

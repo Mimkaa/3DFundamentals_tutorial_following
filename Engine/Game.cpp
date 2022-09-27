@@ -20,25 +20,25 @@
 ******************************************************************************************/
 #include "MainWindow.h"
 #include "Game.h"
-#include "Mat3.h"
-#include "CubeSkinScene.h"
-#include "CubeVertexColorScene.h"
-#include "SolidCubeScene.h"
-#include "AnimatesTextureScene.h"
-#include "DoubleCubeScene.h"
-#include "VertexWaveScene.h"
-#include "CubeVertexPositionColorScene.h"
-#include "SolidCobeGeometryScene.h"
-#include "CubeFlatIndependentLighting.h"
-#include "ProceduralNormalScene.h"
-#include "SmoothBunnyScene.h"
-#include "RotatingFaceScene.h"
-#include "GeometryFlatScene.h"
-#include "GouraudPointLightScene.h"
+#include "Mat.h"
+//#include "CubeSkinScene.h"
+//#include "CubeVertexColorScene.h"
+//#include "SolidCubeScene.h"
+//#include "AnimatesTextureScene.h"
+//#include "DoubleCubeScene.h"
+//#include "VertexWaveScene.h"
+//#include "CubeVertexPositionColorScene.h"
+//#include "SolidCobeGeometryScene.h"
+//#include "CubeFlatIndependentLighting.h"
+//#include "ProceduralNormalScene.h"
+//#include "SmoothBunnyScene.h"
+//#include "RotatingFaceScene.h"
+//#include "GeometryFlatScene.h"
+//#include "GouraudPointLightScene.h"
+//#include "PhongScene.h"
+//#include "SphereScene.h"
 #include "SpecularHighlightScene.h"
-#include "PhongScene.h"
-#include "SphereScene.h"
-#include "GouraudScene.h"
+//#include "GouraudScene.h"
 #include <filesystem>
 #include <sstream>
 #include "Sphere.h"
@@ -47,7 +47,7 @@
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
 	scenes.push_back(std::make_unique<SpecularHighlightScene>(gfx, IndexedTriangleList<SpecularHighlightScene::Vertex>::LoadNormals("models\\suzanne.obj")));
-	scenes.push_back(std::make_unique<PhongScene>(gfx, IndexedTriangleList<PhongScene::Vertex>::LoadNormals("models\\suzanne.obj")));
+	/*scenes.push_back(std::make_unique<PhongScene>(gfx, IndexedTriangleList<PhongScene::Vertex>::LoadNormals("models\\suzanne.obj")));
 	scenes.push_back(std::make_unique<PhongScene>(gfx, Plane::GetNormals<PhongScene::Vertex>()));
 	scenes.push_back(std::make_unique<GouraudPointLightScene>(gfx, Plane::GetNormals<GouraudPointLightScene::Vertex>(16)));
 	scenes.push_back(std::make_unique<GouraudPointLightScene>(gfx, IndexedTriangleList<GouraudPointLightScene::Vertex>::LoadNormals("models\\suzanne.obj")));
@@ -68,7 +68,7 @@ Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 	scenes.push_back(std::make_unique<DoubleCubeScene>(gfx));
 	scenes.push_back(std::make_unique<VertexWaveScene>(gfx));
 	scenes.push_back(std::make_unique<CubeVertexPositionColorScene>(gfx));
-	scenes.push_back(std::make_unique<CubeSolidGeometryScene>(gfx));
+	scenes.push_back(std::make_unique<CubeSolidGeometryScene>(gfx));*/
 	
 	curScene = scenes.begin();
 

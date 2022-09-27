@@ -2,7 +2,7 @@
 
 #include "Pipeline.h"
 #include "DefaultVertexShader.h"
-#include "Mat3.h"
+#include "Mat.h"
 // solid color attribute taken from table in gs and not interpolated
 class RotatingFaceEffect
 {
