@@ -68,7 +68,8 @@ private:
 	// assembles indexed vertex stream into triangles and passes them to post process
 	// culls (does not send) back facing triangles
 	void AssembleTriangles(const std::vector<VSOut>& vertices, const std::vector<size_t>& indices)
-	{
+	{	
+		const auto eyepos = Vec4{ 0.0f,0.0f,0.0f,1.0f } *effect.vs.GetProj();
 		// assemble triangles in the stream and process
 		for (size_t i = 0, end = indices.size() / 3; i < end; i++)
 		{
@@ -77,7 +78,7 @@ private:
 			const auto& v1 = vertices[indices[i * 3 + 1]];
 			const auto& v2 = vertices[indices[i * 3 + 2]];
 			// cull backfacing triangles with cross product (%) shenanigans
-			if ((v1.pos - v0.pos) % (v2.pos - v0.pos) * v0.pos <= 0.0f)
+			if ((v1.pos - v0.pos) % (v2.pos - v0.pos) * Vec3(v0.pos - eyepos) <= 0.0f)
 			{
 				// process 3 vertices into a triangle
 				ProcessTriangle(v0, v1, v2,i);
@@ -91,7 +92,111 @@ private:
 	{
 		// generate triangle from 3 vertices using gs
 		// and send to post-processing
-		PostProcessTriangleVertices(effect.gs(v0, v1, v2, triangle_index));
+		ClipCull(effect.gs(v0, v1, v2, triangle_index));
+	}
+
+	void ClipCull(Triangle<GSOut>& t)
+	{
+		// check against each plane and discard all that are not in our transformed fructum
+		if (t.v0.pos.x > t.v0.pos.w && t.v1.pos.x > t.v1.pos.w && t.v2.pos.x > t.v2.pos.w)
+		{
+			return;
+		}
+		if (t.v0.pos.x < -t.v0.pos.w && t.v1.pos.x < -t.v1.pos.w && t.v2.pos.x < -t.v2.pos.w)
+		{
+			return;
+		}
+		if (t.v0.pos.y > t.v0.pos.w && t.v1.pos.y > t.v1.pos.w && t.v2.pos.y > t.v2.pos.w)
+		{
+			return;
+		}
+		if (t.v0.pos.y < -t.v0.pos.w && t.v1.pos.y < -t.v1.pos.w && t.v2.pos.y < -t.v2.pos.w)
+		{
+			return;
+		}
+		if (t.v0.pos.z > t.v0.pos.w && t.v1.pos.z > t.v1.pos.w && t.v2.pos.z > t.v2.pos.w)
+		{
+			return;
+		}
+		if (t.v0.pos.z < 0 && t.v1.pos.z < 0 && t.v2.pos.z < 0)
+		{
+			return;
+		}
+		// lambda function for 2 different types of clipping
+		// if one side is out
+		auto Clip1 = [this](const GSOut& v0, const GSOut& v1, const GSOut& v2)
+		{
+			// alphas
+			const float alphaA = (-v0.pos.z) / (v1.pos.z - v0.pos.z);
+			const float alphaB = (-v0.pos.z) / (v2.pos.z - v0.pos.z);
+			const auto v0Plane = interpolate(v0, v1, alphaA);
+			const auto v1Plane = interpolate(v0, v2, alphaB);
+			PostProcessTriangleVertices(Triangle<GSOut>{ v1Plane, v0Plane, v1 });
+			PostProcessTriangleVertices(Triangle<GSOut>{ v1Plane, v1, v2 });
+		};
+		// if two side are out
+		auto Clip2 = [this](const GSOut& v0, const GSOut& v1, const GSOut& v2)
+		{
+			// alphas
+			const float alphaA = (-v1.pos.z) / (v0.pos.z - v1.pos.z);
+			const float alphaB = (-v2.pos.z) / (v0.pos.z - v2.pos.z);
+			const auto v0Plane = interpolate(v1, v0, alphaA);
+			const auto v1Plane = interpolate(v2, v0, alphaB);
+			PostProcessTriangleVertices(Triangle<GSOut>{ v0Plane, v0, v1Plane });
+			
+		};
+
+		// perform the clipping for the near z plain
+		if (t.v0.pos.z < 0)
+		{
+			if (t.v1.pos.z < 0)
+			{
+				Clip2(t.v2, t.v1, t.v0);
+			}
+			else if (t.v2.pos.z < 0)
+			{
+				Clip2(t.v1, t.v0, t.v2);
+			}
+			else
+			{
+				Clip1(t.v0, t.v1, t.v2);
+			}
+		}
+
+		if (t.v1.pos.z < 0)
+		{
+			if (t.v0.pos.z < 0)
+			{
+				Clip2(t.v2, t.v1, t.v0);
+			}
+			else if (t.v2.pos.z < 0)
+			{
+				Clip2(t.v0, t.v1, t.v2);
+			}
+			else
+			{
+				Clip1(t.v1, t.v2, t.v0);
+			}
+		}
+
+		if (t.v2.pos.z < 0)
+		{
+			if (t.v0.pos.z < 0)
+			{
+				Clip2(t.v1, t.v0, t.v2);
+			}
+			else if (t.v1.pos.z < 0)
+			{
+				Clip2(t.v0, t.v1, t.v2);
+			}
+			else
+			{
+				Clip1(t.v2, t.v0, t.v1);
+			}
+		}
+
+		PostProcessTriangleVertices(t);
+
 	}
 	// vertex post-processing function
 	// perform perspective and viewport transformations
@@ -205,8 +310,8 @@ private:
 		auto itEdge0 = it0;
 
 		// calculate start and end scanlines
-		const int yStart = (int)ceil(it0.pos.y - 0.5f);
-		const int yEnd = (int)ceil(it2.pos.y - 0.5f); // the scanline AFTER the last line drawn
+		const int yStart = std::max((int)ceil(it0.pos.y - 0.5f),0);
+		const int yEnd = std::min((int)ceil(it2.pos.y - 0.5f), (int)gfx.ScreenHeight-1); // the scanline AFTER the last line drawn
 
 		// do interpolant prestep
 		itEdge0 += dv0 * (float(yStart) + 0.5f - it0.pos.y);
@@ -217,8 +322,8 @@ private:
 		for (int y = yStart; y < yEnd; y++, itEdge0 += dv0, itEdge1 += dv1)
 		{
 			// calculate start and end pixels
-			const int xStart = (int)ceil(itEdge0.pos.x - 0.5f);
-			const int xEnd = (int)ceil(itEdge1.pos.x - 0.5f); // the pixel AFTER the last pixel drawn
+			const int xStart = std::max((int)ceil(itEdge0.pos.x - 0.5f),0);
+			const int xEnd = std::min((int)ceil(itEdge1.pos.x - 0.5f), (int)gfx.ScreenWidth-1); // the pixel AFTER the last pixel drawn
 
 			// create scanline interpolant startpoint
 			// (some waste for interpolating x,y,z, but makes life easier not having
