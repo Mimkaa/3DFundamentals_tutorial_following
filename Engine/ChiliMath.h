@@ -46,3 +46,9 @@ inline T interpolate(const T& start, const T& end, float alpha)
 	return start + (end - start) * alpha;
 
 }
+
+template<typename T>
+constexpr T to_rad(T deg)
+{
+	return deg * PI / (T)180.0;
+}

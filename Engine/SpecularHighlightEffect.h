@@ -125,12 +125,19 @@ public:
 		{
 			return proj;
 		}
+		void BindView(const Mat4& view_in)
+		{
+			view = view_in;
+			worldView = view * world;
+			worldViewProj = worldView * proj;
+		}
+		
 		
 		Output operator()(const Vertex& v) const
 		{
 			// apply transformations to world space
 			const auto p4 = Vec4(v.pos);
-			return { p4 * worldProj,Vec4{ v.n,0.0f } *world,p4 * world };
+			return { p4 * worldViewProj,Vec4{ v.n,0.0f } *worldView,p4 * worldView };
 		}
 
 	private:
@@ -138,6 +145,10 @@ public:
 		Mat4 world = Mat4::Identity();
 		Mat4 proj = Mat4::Identity();
 		Mat4 worldProj = Mat4::Identity();
+		Mat4 view = Mat4::Identity();
+		Mat4 worldView = Mat4::Identity();
+		Mat4 worldViewProj = Mat4::Identity();
+
 
 	};
 	// default gs passes vertices through and outputs triangle

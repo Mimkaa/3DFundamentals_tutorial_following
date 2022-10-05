@@ -21,6 +21,19 @@ public:
 		}
 		return *this;
 	}
+	// inverse orthogonal matrix
+	_Mat operator!() const
+	{
+		_Mat xp;
+		for (size_t j = 0; j < S; j++)
+		{
+			for (size_t k = 0; k < S; k++)
+			{
+				xp.elements[j][k] = elements[k][j];
+			}
+		}
+		return xp;
+	}
 	_Mat operator*(T rhs) const
 	{
 		_Mat result = *this;

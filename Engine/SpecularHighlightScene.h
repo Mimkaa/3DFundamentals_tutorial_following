@@ -7,6 +7,7 @@
 #include "SpecularHighlightEffect.h"
 #include "Sphere.h"
 #include "SolidCubeEffect.h"
+#include "MouseHandler.h"
 
 class SpecularHighlightScene : public Scene
 {
@@ -34,67 +35,88 @@ public:
 	}
 	virtual void Update(Keyboard& kbd, Mouse& mouse, float dt) override
 	{
-		if (kbd.KeyIsPressed('Q'))
-		{
-			theta_x = wrap_angle(theta_x + dTheta * dt);
-		}
+	
 		if (kbd.KeyIsPressed('W'))
 		{
-			theta_y = wrap_angle(theta_y + dTheta * dt);
-		}
-		if (kbd.KeyIsPressed('E'))
-		{
-			theta_z = wrap_angle(theta_z + dTheta * dt);
-		}
-		if (kbd.KeyIsPressed('A'))
-		{
-			theta_x = wrap_angle(theta_x - dTheta * dt);
+			cam_pos += Vec4{ 0.0f,0.0f,1.0f,0.0f } *!cam_rot * cam_speed * dt;
 		}
 		if (kbd.KeyIsPressed('S'))
 		{
-			theta_y = wrap_angle(theta_y - dTheta * dt);
+			cam_pos += Vec4{ 0.0f,0.0f,-1.0f,0.0f } *!cam_rot * cam_speed * dt;
 		}
 		if (kbd.KeyIsPressed('D'))
 		{
-			theta_z = wrap_angle(theta_z - dTheta * dt);
+			cam_pos += Vec4{ 1.0f,0.0f,0.0f,0.0f } *!cam_rot * cam_speed * dt;
 		}
-		if (kbd.KeyIsPressed('U'))
+		if (kbd.KeyIsPressed('A'))
 		{
-			loffset_x += 0.2f * dt;
-		}
-		if (kbd.KeyIsPressed('I'))
-		{
-			loffset_y += 0.2f * dt;
-		}
-		if (kbd.KeyIsPressed('O'))
-		{
-			loffset_z += 0.2f * dt;
-		}
-		if (kbd.KeyIsPressed('J'))
-		{
-			loffset_x -= 0.2f * dt;
-		}
-		if (kbd.KeyIsPressed('K'))
-		{
-			loffset_y -= 0.2f * dt;
-		}
-		if (kbd.KeyIsPressed('L'))
-		{
-			loffset_z -= 0.2f * dt;
+			cam_pos += Vec4{ -1.0f,0.0f,0.0f,0.0f } *!cam_rot * cam_speed * dt;
 		}
 		if (kbd.KeyIsPressed('R'))
 		{
-			offset_z += 0.2f * dt;
+			cam_pos += Vec4{ 0.0f,1.0f,0.0f,0.0f } *!cam_rot * cam_speed * dt;
 		}
 		if (kbd.KeyIsPressed('F'))
 		{
-			offset_z -= 0.2f * dt;
+			cam_pos += Vec4{ 0.0f,-1.0f,0.0f,0.0f } *!cam_rot * cam_speed * dt;
 		}
+		// mouse events
+		while (!mouse.IsEmpty())
+		{
+			const auto e = mouse.Read();
+			switch (e.GetType())
+			{
+			case Mouse::Event::Type::LPress:
+				mt.Engage(e.GetPos());
+				break;
+			case Mouse::Event::Type::LRelease:
+				mt.Release();
+				break;
+			case Mouse::Event::Type::Move:
+				if (mt.Engaged())
+				{
+					const auto delta = mt.Move(e.GetPos());
+					cam_rot = cam_rot
+						* Mat4::RotationY((float)-delta.x * htrack)
+						* Mat4::RotationX((float)-delta.y * vtrack);
+				}
+				break;
+			}
+		}
+	
+
+
+		if (kbd.KeyIsPressed('U'))
+		{
+			light_pos.x += 0.2f * dt;
+		}
+		if (kbd.KeyIsPressed('I'))
+		{
+			light_pos.y += 0.2f * dt;
+		}
+		if (kbd.KeyIsPressed('O'))
+		{
+			light_pos.z += 0.2f * dt;
+		}
+		if (kbd.KeyIsPressed('J'))
+		{
+			light_pos.x -= 0.2f * dt;
+		}
+		if (kbd.KeyIsPressed('K'))
+		{
+			light_pos.y -= 0.2f * dt;
+		}
+		if (kbd.KeyIsPressed('L'))
+		{
+			light_pos.z -= 0.2f * dt;
+		}
+		
 	}
 	virtual void Draw() override
 	{
 		pipeline.BeginFrame();
-		const auto proj = Mat4::ProjectionHFOV(100.0f, 1.33333f, 0.5f, 4.0f);;
+		const auto proj = Mat4::ProjectionHFOV(100.0f, 1.33333f, 0.5f, 4.0f);
+		const auto view = Mat4::Translation(-cam_pos) * cam_rot;
 		pipeline.effect.vs.BindWorld(
 			Mat4::RotationX(theta_x) *
 			Mat4::RotationY(theta_y) *
@@ -102,7 +124,8 @@ public:
 			Mat4::Translation(0.0f, 0.0f, offset_z)
 		);
 		pipeline.effect.vs.BindProjection(proj);
-		pipeline.effect.ps.SetLightPosition({ loffset_x,loffset_y,loffset_z });
+		pipeline.effect.vs.BindView(view);
+		pipeline.effect.ps.SetLightPosition({ light_pos });
 		//pipeline.effect.vs.SetLightPosition(light_pos);
 		// render triangles
 		pipeline.Draw(itlist);
@@ -111,7 +134,8 @@ public:
 
 
 		// set pipeline transform
-		Lightpipeline.effect.vs.BindWorld(Mat4::Translation(loffset_x, loffset_y, loffset_z));
+		Lightpipeline.effect.vs.BindWorldView(Mat4::Translation(light_pos) * view);
+
 		Lightpipeline.effect.vs.BindProjection(proj);
 
 		//pipeline.effect.vs.SetLightPosition(light_pos);
@@ -119,6 +143,7 @@ public:
 		Lightpipeline.Draw(itlistLightPoint);
 	}
 private:
+	MouseHandler mt;
 	std::shared_ptr<ZBuffer> pZb;
 	IndexedTriangleList<SolidEffect::Vertex> itlistLightPoint = Sphere::GetPlain<SolidEffect::Vertex>(20, 20, 0.05f);
 	IndexedTriangleList<Vertex> itlist;
@@ -129,9 +154,18 @@ private:
 	float theta_x = 0.0f;
 	float theta_y = 0.0f;
 	float theta_z = 0.0f;
-	float loffset_x = 0.0f;
-	float loffset_y = 0.0f;
-	float loffset_z = 0.5f;
-	Vec3 light_pos = { loffset_x,loffset_y,loffset_z };
+	
+	Vec3 light_pos = { 0.0f,0.0f,0.7f };
+	// camera
+	static constexpr float hfov = 95.0f;//x fow
+	static constexpr float aspect_ratio = 1.333f;
+	static constexpr float vfov = hfov/ aspect_ratio;// y fow
+	// amount of rotation per pixel of movement on the screen
+	static constexpr float htrack = to_rad(hfov) / (float)Graphics::ScreenWidth;
+	static constexpr float vtrack = to_rad(vfov) / (float)Graphics::ScreenHeight;
+	Vec3 cam_pos = { 0.0f, 0.0f, 0.0f };
+	Vec3 cam_dir = { 0.0f, 0.0f, 1.0f };
+	Mat4 cam_rot = Mat4::Identity();
+	static constexpr float cam_speed = 1.0f;
 };
 
