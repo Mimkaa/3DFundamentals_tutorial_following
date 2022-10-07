@@ -155,6 +155,7 @@
     <ClInclude Include="DefaultVertexShader.h" />
     <ClInclude Include="DoubleCubeScene.h" />
     <ClInclude Include="DXErr.h" />
+    <ClInclude Include="Final_Scene.h" />
     <ClInclude Include="FrameTimer.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GDIPlusManager.h" />

@@ -138,7 +138,7 @@ public:
 		void BindProjection(const Mat4& transformation_in)
 		{
 			proj = transformation_in;
-			worldViewProj = worldView * proj;
+			
 		}
 		const Mat4& GetProj() const
 		{

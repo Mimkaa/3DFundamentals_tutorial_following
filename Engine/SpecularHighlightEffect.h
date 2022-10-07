@@ -110,28 +110,22 @@ public:
 			Vec3 n;
 		};
 	public:
-		void BindWorld(const Mat4& transformation_in)
+		void BindWorldView(const Mat4& transformation_in)
 		{
 			
-			world = transformation_in;
-			worldProj = world * proj;
+			worldView = transformation_in;
+			worldViewProj = worldView * proj;
 		}
 		void BindProjection(const Mat4& transformation_in)
 		{
 			proj = transformation_in;
-			worldProj = world * proj;
+			
 		}
 		const Mat4& GetProj() const
 		{
 			return proj;
 		}
-		void BindView(const Mat4& view_in)
-		{
-			view = view_in;
-			worldView = view * world;
-			worldViewProj = worldView * proj;
-		}
-		
+	
 		
 		Output operator()(const Vertex& v) const
 		{
@@ -142,10 +136,8 @@ public:
 
 	private:
 	
-		Mat4 world = Mat4::Identity();
+		
 		Mat4 proj = Mat4::Identity();
-		Mat4 worldProj = Mat4::Identity();
-		Mat4 view = Mat4::Identity();
 		Mat4 worldView = Mat4::Identity();
 		Mat4 worldViewProj = Mat4::Identity();
 
@@ -167,7 +159,7 @@ public:
 			// get light direction
 			const auto v_to_l = light_pos - in.worldPos;
 			const auto dist = v_to_l.Len();
-			// opposite of what it is supposed to be
+			// opposite of what it is supposed to be (light dir)
 			//not to multiply by minus normal
 			const auto LightDir = v_to_l / dist;
 			// calculate attenuation
@@ -198,7 +190,8 @@ public:
 		void SetLightPosition(const Vec3& dl)
 		{
 			assert(dl.LenSq() >= 0.001f);
-			light_pos = dl.GetNormalized();
+			
+			light_pos = dl;
 		}
 		void SetMaterialColor(Color c)
 		{

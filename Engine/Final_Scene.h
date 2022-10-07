@@ -1,4 +1,5 @@
 #pragma once
+#pragma once
 
 #include "Scene.h"
 #include "Cube.h"
@@ -8,22 +9,57 @@
 #include "Sphere.h"
 #include "SolidCubeEffect.h"
 #include "MouseHandler.h"
+#include "TextureEffect.h"
+#include "Plane.h"
 
-class SpecularHighlightScene : public Scene
+class FinalScene : public Scene
 {
+	template<class Vertex>
+	class Wall
+	{
+	public:
+		
+		Wall(const Mat3& rotMat, const Vec3& offset_in, IndexedTriangleList<Vertex> it, float scale_in = 1.0)
+		{
+			offset = offset_in;
+			rot_mat = rotMat;
+			//itList(std::move(it));
+			itList.vertices = it.vertices;
+			itList.indices = it.indices;
+			scale = scale_in;
+			// tansform pos
+			for (auto& v : itList.vertices)
+			{
+				v.pos *= scale;
+				v.pos *= rotMat;
+				v.pos += offset;
+				v.n *= rotMat;
+				
+
+
+			}
+		}
+	public:
+		IndexedTriangleList<Vertex> itList;
+		Mat3 rot_mat;
+		Vec3 offset;
+		float scale;
+	
+	};
 public:
 	// :: was used to access the global scope 
 	typedef ::Pipeline<SpecularHighlightEffect> Pipeline;
 	typedef ::Pipeline<SolidEffect> PipelineLight;
+	typedef ::Pipeline<TextureEffect> WallsPipeline;
 	typedef Pipeline::Vertex Vertex;
 public:
-	SpecularHighlightScene(Graphics& gfx, IndexedTriangleList<Vertex> it)
+	FinalScene(Graphics& gfx, IndexedTriangleList<Vertex> it)
 		:
 		pZb(std::make_shared<ZBuffer>(gfx.ScreenWidth, gfx.ScreenHeight)),
 		itlist(std::move(it)),
 		pipeline(gfx, pZb),
-		Lightpipeline(gfx, pZb)
-
+		Lightpipeline(gfx, pZb),
+		WallsPipeLine(gfx, pZb)
 	{
 
 		itlist.AdjustToTrueCenter();
@@ -32,10 +68,21 @@ public:
 		{
 			v.color = Colors::White;
 		}
+		// init walls
+		float padding = 5.0f;
+		// back, front
+		walls.push_back(Wall<TextureEffect::Vertex>(Mat3::RotationX(0.0f), Vec3(0.0f, 0.0f, padding), Plane::GetSkinnedNormals<TextureEffect::Vertex>(20), padding*2));
+		walls.push_back(Wall<TextureEffect::Vertex>(Mat3::RotationX(0.0f), Vec3(0.0f, 0.0f, -padding), Plane::GetSkinnedNormals<TextureEffect::Vertex>(7, 1.0f, true), padding * 2));
+		// top, bottom
+		walls.push_back(Wall<TextureEffect::Vertex>(Mat3::RotationX(PI/2), Vec3(0.0f, -padding, 0.0f), Plane::GetSkinnedNormals<TextureEffect::Vertex>(), padding * 2));
+		walls.push_back(Wall<TextureEffect::Vertex>(Mat3::RotationX(PI / 2), Vec3(0.0f, +padding, 0.0f), Plane::GetSkinnedNormals<TextureEffect::Vertex>(7,1.0f, true), padding * 2));
+		// left right
+		walls.push_back(Wall<TextureEffect::Vertex>(Mat3::RotationY(PI / 2), Vec3(-padding, 0.0f, 0.0f), Plane::GetSkinnedNormals<TextureEffect::Vertex>(7, 1.0f, true), padding * 2));
+		walls.push_back(Wall<TextureEffect::Vertex>(Mat3::RotationY(PI / 2), Vec3(padding, 0.0f, 0.0f), Plane::GetSkinnedNormals<TextureEffect::Vertex>(7, 1.0f, false), padding * 2));
 	}
 	virtual void Update(Keyboard& kbd, Mouse& mouse, float dt) override
 	{
-	
+
 		if (kbd.KeyIsPressed('W'))
 		{
 			cam_pos += Vec4{ 0.0f,0.0f,1.0f,0.0f } *!cam_rot * cam_speed * dt;
@@ -83,7 +130,7 @@ public:
 				break;
 			}
 		}
-	
+
 
 
 		if (kbd.KeyIsPressed('U'))
@@ -110,55 +157,71 @@ public:
 		{
 			light_pos.z -= 0.2f * dt;
 		}
-		
+
 	}
 	virtual void Draw() override
 	{
 		pipeline.BeginFrame();
-		const auto proj = Mat4::ProjectionHFOV(100.0f, 1.33333f, 0.5f, 4.0f);
+		const auto proj = Mat4::ProjectionHFOV(hfov, 1.33333f, 0.5f, 15.0f);
 		const auto view = Mat4::Translation(-cam_pos) * cam_rot;
+		
+		/*Vec4 lightV4 = Vec4(light_pos) * view;
+		Vec3 light_pos_view = { lightV4.x,lightV4.y ,lightV4.z };*/
+
 		pipeline.effect.vs.BindWorldView(
 			Mat4::RotationX(theta_x) *
 			Mat4::RotationY(theta_y) *
 			Mat4::RotationZ(theta_z) *
-			Mat4::Translation(0.0f, 0.0f, offset_z) * view
+			Mat4::Translation(Vec3{ 0.0f,0.0f,2.0f }) * view
 		);
 		pipeline.effect.vs.BindProjection(proj);
-		pipeline.effect.ps.SetLightPosition(light_pos * view );
+		// light indicne.effect.vs.BindProjection(proj);
+		pipeline.effect.ps.SetLightPosition(light_pos*view );
 		//pipeline.effect.vs.SetLightPosition(light_pos);
 		// render triangles
 		pipeline.Draw(itlist);
 
-
-
-
-		// set pipeline transform
-		Lightpipeline.effect.vs.BindWorldView(Mat4::Translation(light_pos) * view);
-
+		Lightpipeline.effect.vs.BindWorldView(Mat4::Translation( light_pos) * view);
 		Lightpipeline.effect.vs.BindProjection(proj);
-
-		//pipeline.effect.vs.SetLightPosition(light_pos);
 		// render triangles
 		Lightpipeline.Draw(itlistLightPoint);
+
+		// walls
+		for (auto& w : walls)
+		{
+			WallsPipeLine.effect.vs.BindWorldView(
+				Mat4::RotationX(theta_x) *
+				Mat4::RotationY(theta_y) *
+				Mat4::RotationZ(theta_z) *
+				Mat4::Translation(0.0f, 0.0f, 0.0f) * view
+				
+			);
+			WallsPipeLine.effect.ps.BindTexture(L"Images\\Small_wall.png");
+			WallsPipeLine.effect.vs.BindProjection(proj);
+			WallsPipeLine.effect.ps.SetLightPosition(light_pos * view);
+			WallsPipeLine.effect.ps.SetScale(3.0f);
+			WallsPipeLine.Draw(w.itList);
+		}
 	}
 private:
 	MouseHandler mt;
 	std::shared_ptr<ZBuffer> pZb;
-	IndexedTriangleList<SolidEffect::Vertex> itlistLightPoint = Sphere::GetPlain<SolidEffect::Vertex>(20, 20, 0.05f);
+	IndexedTriangleList<SolidEffect::Vertex> itlistLightPoint = Sphere::GetPlain<SolidEffect::Vertex>(20, 20, 0.1f);
 	IndexedTriangleList<Vertex> itlist;
 	Pipeline pipeline;
 	PipelineLight Lightpipeline;
+	WallsPipeline WallsPipeLine;
 	static constexpr float dTheta = PI;
 	float offset_z = 2.0f;
 	float theta_x = 0.0f;
 	float theta_y = 0.0f;
 	float theta_z = 0.0f;
-	
-	Vec4 light_pos = { 0.0f,0.0f,0.7f,1.0f };
+
+	Vec4 light_pos = { 0.0f,0.0f,0.7f, 1.0f };
 	// camera
 	static constexpr float hfov = 95.0f;//x fow
 	static constexpr float aspect_ratio = 1.333f;
-	static constexpr float vfov = hfov/ aspect_ratio;// y fow
+	static constexpr float vfov = hfov / aspect_ratio;// y fow
 	// amount of rotation per pixel of movement on the screen
 	static constexpr float htrack = to_rad(hfov) / (float)Graphics::ScreenWidth;
 	static constexpr float vtrack = to_rad(vfov) / (float)Graphics::ScreenHeight;
@@ -166,5 +229,7 @@ private:
 	Vec3 cam_dir = { 0.0f, 0.0f, 1.0f };
 	Mat4 cam_rot = Mat4::Identity();
 	static constexpr float cam_speed = 1.0f;
-};
 
+	// walls
+	std::vector<Wall<TextureEffect::Vertex>> walls;
+};

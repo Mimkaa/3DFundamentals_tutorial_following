@@ -5,7 +5,7 @@ class Plane
 {
 public:
 	template<class V>
-	static IndexedTriangleList<V> GetPlain(int divisions = 7, float size = 1.0f)
+	static IndexedTriangleList<V> GetPlain(int divisions = 7, float size = 1.0f, bool reverseWinding = false)
 	{
 		const int VerticesPerDevSide = divisions + 1;
 		std::vector<V> vertices(sq(VerticesPerDevSide + 1));
@@ -45,22 +45,35 @@ public:
 
 					const std::array<size_t, 4> indexArray =
 					{ vxy2i(x,y),vxy2i(x + 1,y),vxy2i(x,y + 1),vxy2i(x + 1,y + 1) };
-					indices.push_back(indexArray[0]);
-					indices.push_back(indexArray[2]);
-					indices.push_back(indexArray[1]);
-					indices.push_back(indexArray[1]);
-					indices.push_back(indexArray[2]);
-					indices.push_back(indexArray[3]);
+					if (!reverseWinding)
+					{
+						indices.push_back(indexArray[0]);
+						indices.push_back(indexArray[2]);
+						indices.push_back(indexArray[1]);
+						indices.push_back(indexArray[1]);
+						indices.push_back(indexArray[2]);
+						indices.push_back(indexArray[3]);
+					}
+					else
+					{
+						indices.push_back(indexArray[0]);
+						indices.push_back(indexArray[1]);
+						indices.push_back(indexArray[2]);
+						indices.push_back(indexArray[1]);
+						indices.push_back(indexArray[3]);
+						indices.push_back(indexArray[2]);
+					}
 				}
 			}
 
 		}
 		return{ std::move(vertices),std::move(indices) };
 	}
+
 	template<class V>
-	static IndexedTriangleList<V> GetSkinned(int divisions = 7, float size = 1.0f)
+	static IndexedTriangleList<V> GetSkinned(int divisions = 7, float size = 1.0f, bool reverseWinding = false)
 	{
-		auto itlist = GetPlain<V>(divisions, size);
+		auto itlist = GetPlain<V>(divisions, size, reverseWinding);
 		{
 			const int nVerticesSide = divisions + 1;
 			const float tDivisionSize = 1.0f / float(divisions);
@@ -81,15 +94,38 @@ public:
 	}
 
 	template<class V>
-	static IndexedTriangleList<V> GetNormals(int divisions = 7, float size = 1.0f)
+	static IndexedTriangleList<V> GetNormals(int divisions = 7, float size = 1.0f, bool reverseWinding = false)
 	{
-		auto tl = GetPlain<V>(divisions, size);
+		auto tl = GetPlain<V>(divisions, size, reverseWinding);
 		for (auto& v : tl.vertices)
 		{
-			v.n = { 0.0f, 0.0f, -1.0f };
+			if (!reverseWinding)
+			{
+				v.n = { 0.0f, 0.0f, -1.0f };
+			}
+			else
+			{
+				v.n = { 0.0f, 0.0f, 1.0f };
+			}
 		}
 		return tl;
 	}
 
-	
+	template<class V>
+	static IndexedTriangleList<V> GetSkinnedNormals(int divisions = 7, float size = 1.0f, bool reverseWinding = false)
+	{
+		auto tl = GetSkinned<V>(divisions, size, reverseWinding);
+		for (auto& v : tl.vertices)
+		{
+			if (!reverseWinding)
+			{
+				v.n = { 0.0f, 0.0f, -1.0f };
+			}
+			else
+			{
+				v.n = { 0.0f, 0.0f, 1.0f };
+			}
+		}
+		return tl;
+	}
 };

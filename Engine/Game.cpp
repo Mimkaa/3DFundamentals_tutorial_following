@@ -39,6 +39,7 @@
 //#include "SphereScene.h"
 #include "SpecularHighlightScene.h"
 //#include "GouraudScene.h"
+#include "Final_Scene.h"
 #include <filesystem>
 #include <sstream>
 #include "Sphere.h"
@@ -46,6 +47,7 @@
 
 Game::Game( MainWindow& wnd ):wnd( wnd ),gfx( wnd )
 {
+	scenes.push_back(std::make_unique<FinalScene>(gfx, IndexedTriangleList<FinalScene::Vertex>::LoadNormals("models\\suzanne.obj")));
 	scenes.push_back(std::make_unique<SpecularHighlightScene>(gfx, IndexedTriangleList<SpecularHighlightScene::Vertex>::LoadNormals("models\\suzanne.obj")));
 	/*scenes.push_back(std::make_unique<PhongScene>(gfx, IndexedTriangleList<PhongScene::Vertex>::LoadNormals("models\\suzanne.obj")));
 	scenes.push_back(std::make_unique<PhongScene>(gfx, Plane::GetNormals<PhongScene::Vertex>()));

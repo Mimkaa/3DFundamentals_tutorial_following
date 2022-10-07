@@ -24,5 +24,5 @@ public:
 	}
 private :
 	Vei2 recorded;
-	bool engaged;
+	bool engaged = false;
 };

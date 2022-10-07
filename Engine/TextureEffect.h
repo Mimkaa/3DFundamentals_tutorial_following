@@ -18,61 +18,137 @@ public:
 		{}
 		Vertex(const Vec3& pos, const Vertex& src)
 			:
-			t(src.t),
+			n(src.n),
 			pos(pos)
 		{}
-		Vertex(const Vec3& pos, const Vec2& t)
+		Vertex(const Vec3& pos, const Vec3& n)
 			:
-			t(t),
+			n(n),
 			pos(pos)
 		{}
-		Vertex& operator+=(const Vertex& rhs)
-		{
-			pos += rhs.pos;
-			t += rhs.t;
-			return *this;
-		}
-		Vertex operator+(const Vertex& rhs) const
-		{
-			return Vertex(*this) += rhs;
-		}
-		Vertex& operator-=(const Vertex& rhs)
-		{
-			pos -= rhs.pos;
-			t -= rhs.t;
-			return *this;
-		}
-		Vertex operator-(const Vertex& rhs) const
-		{
-			return Vertex(*this) -= rhs;
-		}
-		Vertex& operator*=(float rhs)
-		{
-			pos *= rhs;
-			t *= rhs;
-			return *this;
-		}
-		Vertex operator*(float rhs) const
-		{
-			return Vertex(*this) *= rhs;
-		}
-		Vertex& operator/=(float rhs)
-		{
-			pos /= rhs;
-			t /= rhs;
-			return *this;
-		}
-		Vertex operator/(float rhs) const
-		{
-			return Vertex(*this) /= rhs;
-		}
 	public:
 		Vec3 pos;
+		Vec3 n;
 		Vec2 t;
 	};
-	// default vs rotates and translates vertices
-	// does not touch attributes
-	typedef DefaultVertexShader<Vertex> VertexShader;
+	// calculate color based on normal to light angle
+	// no interpolation of color attribute
+	class VertexShader
+	{
+	public:
+		class Output
+		{
+		public:
+			Output() = default;
+			Output(const Vec4& pos)
+				:
+				pos(pos)
+			{}
+			Output(const Vec4& pos, const Output& src)
+				:
+				n(src.n),
+				worldPos(src.worldPos),
+				pos(pos),
+				t(src.t)
+			{}
+			Output(const Vec4& pos, const Vec3& n, const Vec3& worldPos, const Vec2& t)
+				:
+				worldPos(worldPos),
+				n(n),
+				pos(pos),
+				t(t)
+			{}
+			Output& operator+=(const Output& rhs)
+			{
+				pos += rhs.pos;
+				n += rhs.n;
+				worldPos += rhs.worldPos;
+				t += rhs.t;
+				return *this;
+			}
+			Output operator+(const Output& rhs) const
+			{
+				return Output(*this) += rhs;
+			}
+			Output& operator-=(const Output& rhs)
+			{
+				pos -= rhs.pos;
+				n -= rhs.n;
+				worldPos -= rhs.worldPos;
+				t -= rhs.t;
+				return *this;
+			}
+			Output operator-(const Output& rhs) const
+			{
+				return Output(*this) -= rhs;
+			}
+			Output& operator*=(float rhs)
+			{
+				pos *= rhs;
+				n *= rhs;
+				worldPos *= rhs;
+				t *= rhs;
+				return *this;
+			}
+			Output operator*(float rhs) const
+			{
+				return Output(*this) *= rhs;
+			}
+			Output& operator/=(float rhs)
+			{
+				pos /= rhs;
+				n /= rhs;
+				worldPos /= rhs;
+				t /= rhs;
+				return *this;
+			}
+			Output operator/(float rhs) const
+			{
+				return Output(*this) /= rhs;
+			}
+		public:
+			Vec4 pos;
+			// pristine word position
+			Vec3 worldPos;
+			Vec3 n;
+			Vec2 t;
+		};
+	public:
+		void BindWorldView(const Mat4& transformation_in)
+		{
+
+			worldView = transformation_in;
+			worldViewProj = worldView * proj;
+		
+		}
+		void BindProjection(const Mat4& transformation_in)
+		{
+			proj = transformation_in;
+			
+		}
+		const Mat4& GetProj() const
+		{
+			return proj;
+		}
+		
+
+
+		Output operator()(const Vertex& v) const
+		{
+			// apply transformations to world space
+			const auto p4 = Vec4(v.pos);
+			return { p4 * worldViewProj,Vec4{ v.n,0.0f } *worldView,p4 * worldView, v.t};
+		}
+
+	private:
+
+		Mat4 proj = Mat4::Identity();
+		Mat4 worldView = Mat4::Identity();
+		Mat4 worldViewProj = Mat4::Identity();
+
+
+	};
+	// default gs passes vertices through and outputs triangle
 	typedef DefaultGeometryShader<VertexShader::Output> GeometryShader;
 	// invoked for each pixel of a triangle
 	// takes an input of attributes that are the
@@ -84,10 +160,37 @@ public:
 		template<class Input>
 		Color operator()(const Input& in) const
 		{
-			return pTex->GetPixel(
-				(unsigned int)std::min(in.t.x * tex_width + 0.5f, tex_xclamp),
-				(unsigned int)std::min(in.t.y * tex_height + 0.5f, tex_yclamp)
+			unsigned int tx = (unsigned int)std::fmod(std::max(in.t.x * tex_width ,0.0f), tex_xclamp);
+			unsigned int ty = (unsigned int)std::fmod(std::max(in.t.y * tex_height ,0.0f), tex_yclamp);
+
+			Color pixColor = pTex->GetPixel(
+				tx,
+				ty
 			);
+			auto norm_backup = in.n.GetNormalized();
+			// get light direction
+			const auto v_to_l = light_pos - in.worldPos;
+			const auto dist = v_to_l.Len()/ scale;
+			// opposite of what it is supposed to be (light dir)
+			//not to multiply by minus normal
+			const auto LightDir = v_to_l / dist;
+			// calculate attenuation
+			const float attenuation = 1.0f /
+				(constant_attenuation + linear_attenuation * dist + quadratic_attenuation * sq(dist));
+			// calculate intensity based on angle of incidence
+			const auto d = light_diffuse * attenuation * std::max(0.0f, norm_backup * LightDir) ;
+
+			//// specular highlight
+			//const auto w = norm_backup * (v_to_l * norm_backup);
+			//// opposite direction of the reflection
+			//const auto r = w * 2 - v_to_l;
+			////specular intensity between view vector an the reflection
+			//const auto s = light_diffuse * specular_intensity * std::pow(std::max(0.0f, -r.GetNormalized() * in.worldPos.GetNormalized()), specular_power);
+
+			// add diffuse+ambient, filter by material color, saturate and scale
+			Vec3 material_color = (Vec3)pixColor/255.0f;
+			const auto c = material_color.GetHadamard(d + light_ambient ).Saturate() * 255.0f ;
+			return Color(c);
 		}
 		void BindTexture(const std::wstring& filename)
 		{
@@ -97,12 +200,48 @@ public:
 			tex_xclamp = tex_width - 1.0f;
 			tex_yclamp = tex_height - 1.0f;
 		}
+		void SetDiffuseLight(const Vec3& c)
+		{
+			light_diffuse = { c.x,c.y,c.z };
+		}
+		void SetAmbientLight(const Vec3& c)
+		{
+			light_ambient = { c.x,c.y,c.z };
+		}
+		void SetLightPosition(const Vec3& dl)
+		{
+			assert(dl.LenSq() >= 0.001f);
+			light_pos = dl;
+		}
+		void SetScale(float s)
+		{
+			assert(s >= 0.001f);
+			{
+				scale = s;
+			}
+		}
+		
+	
 	private:
 		std::unique_ptr<Surface> pTex;
 		float tex_width;
 		float tex_height;
 		float tex_xclamp;
 		float tex_yclamp;
+
+		Vec3 light_pos = { 0.0f,0.0f, 0.5f };
+		// color of direct light
+		Vec3 light_diffuse = { 1.0f,1.0f,1.0f };
+		// indirect light
+		Vec3 light_ambient = { 0.1f,0.1f,0.1f };
+
+		float linear_attenuation = 1.0f;
+		float quadratic_attenuation = 1.619f;
+		float constant_attenuation = 0.382f;
+
+		float specular_power = 30.0f;
+		float specular_intensity = 0.6f;
+		float scale = 1.0f;
 	};
 public:
 	PixelShader ps;
