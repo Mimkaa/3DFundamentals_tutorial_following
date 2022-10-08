@@ -11,6 +11,8 @@
 #include "MouseHandler.h"
 #include "TextureEffect.h"
 #include "Plane.h"
+#include "WaveVertexTextureEffect.h"
+#include "NormiePipe.h"
 
 class FinalScene : public Scene
 {
@@ -51,6 +53,7 @@ public:
 	typedef ::Pipeline<SpecularHighlightEffect> Pipeline;
 	typedef ::Pipeline<SolidEffect> PipelineLight;
 	typedef ::Pipeline<TextureEffect> WallsPipeline;
+	typedef ::Pipeline< WaveVertexTextureEffect> WavePipeline;
 	typedef Pipeline::Vertex Vertex;
 public:
 	FinalScene(Graphics& gfx, IndexedTriangleList<Vertex> it)
@@ -59,7 +62,8 @@ public:
 		itlist(std::move(it)),
 		pipeline(gfx, pZb),
 		Lightpipeline(gfx, pZb),
-		WallsPipeLine(gfx, pZb)
+		WallsPipeLine(gfx, pZb),
+		wavePipe(gfx, pZb)
 	{
 
 		itlist.AdjustToTrueCenter();
@@ -79,6 +83,14 @@ public:
 		// left right
 		walls.push_back(Wall<TextureEffect::Vertex>(Mat3::RotationY(PI / 2), Vec3(-padding, 0.0f, 0.0f), Plane::GetSkinnedNormals<TextureEffect::Vertex>(7, 1.0f, true), padding * 2));
 		walls.push_back(Wall<TextureEffect::Vertex>(Mat3::RotationY(PI / 2), Vec3(padding, 0.0f, 0.0f), Plane::GetSkinnedNormals<TextureEffect::Vertex>(7, 1.0f, false), padding * 2));
+
+		// init wave
+		Waveitlist = Plane::GetSkinnedNormals<WaveVertexTextureEffect::Vertex>(30, 1.0f, false);
+		for (auto& v : Waveitlist.vertices)
+		{
+			v.pos *= Mat3::RotationX(PI / 2);
+			v.n *= Mat3::RotationX(PI / 2);
+		}
 	}
 	virtual void Update(Keyboard& kbd, Mouse& mouse, float dt) override
 	{
@@ -157,6 +169,10 @@ public:
 		{
 			light_pos.z -= 0.2f * dt;
 		}
+		time += dt;
+		light_pos.y += sin(time)/20;
+		pipeline.effect.vs.SetTime(time/2);
+		wavePipe.effect.vs.SetTime(time);
 
 	}
 	virtual void Draw() override
@@ -172,7 +188,7 @@ public:
 			Mat4::RotationX(theta_x) *
 			Mat4::RotationY(theta_y) *
 			Mat4::RotationZ(theta_z) *
-			Mat4::Translation(Vec3{ 0.0f,0.0f,2.0f }) * view
+			Mat4::Translation(Vec3{ 0.0f,0.0f,2.5f }) * view
 		);
 		pipeline.effect.vs.BindProjection(proj);
 		// light indicne.effect.vs.BindProjection(proj);
@@ -202,6 +218,18 @@ public:
 			WallsPipeLine.effect.ps.SetScale(3.0f);
 			WallsPipeLine.Draw(w.itList);
 		}
+		// wave
+		wavePipe.effect.vs.BindWorldView(
+			Mat4::RotationX(theta_x) *
+			Mat4::RotationY(theta_y) *
+			Mat4::RotationZ(theta_z) *
+			Mat4::Translation(WavePos) * view
+
+		);
+		wavePipe.effect.vs.BindProjection(proj);
+		wavePipe.effect.ps.SetLightPosition(light_pos * view);
+		wavePipe.effect.ps.BindTexture(L"Images\\Uta.png");
+		wavePipe.Draw(Waveitlist);
 	}
 private:
 	MouseHandler mt;
@@ -217,7 +245,7 @@ private:
 	float theta_y = 0.0f;
 	float theta_z = 0.0f;
 
-	Vec4 light_pos = { 0.0f,0.0f,0.7f, 1.0f };
+	Vec4 light_pos = { 0.0f,-1.5f,0.3f, 1.0f };
 	// camera
 	static constexpr float hfov = 95.0f;//x fow
 	static constexpr float aspect_ratio = 1.333f;
@@ -232,4 +260,10 @@ private:
 
 	// walls
 	std::vector<Wall<TextureEffect::Vertex>> walls;
+	//time
+	float time = 0.0f;
+	// wave
+	WavePipeline wavePipe;
+	IndexedTriangleList< WaveVertexTextureEffect::Vertex> Waveitlist;
+	Vec3 WavePos = { 0.0f, -1.5f, -0.5f };
 };

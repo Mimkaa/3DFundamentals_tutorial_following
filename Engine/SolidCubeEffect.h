@@ -145,9 +145,12 @@ public:
 			return proj;
 		}
 		
+		
 		Output operator()(const Vertex& v) const
 		{
-			return{ Vec4(v.pos) * worldViewProj,v.color };
+			Vec4 transformed = Vec4(v.pos) * worldViewProj;
+			//MoveVertex(transformed, 2.0f);
+			return{ transformed,v.color };
 		}
 	private:
 		
@@ -155,6 +158,7 @@ public:
 		Mat4 view = Mat4::Identity();
 		Mat4 worldView = Mat4::Identity();
 		Mat4 worldViewProj = Mat4::Identity();
+		
 	};
 	typedef DefaultGeometryShader<VertexShader::Output> GeometryShader;
 	// invoked for each pixel of a triangle

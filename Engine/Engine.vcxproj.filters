@@ -222,6 +222,9 @@
     <ClInclude Include="Final_Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NormiePipe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXErr.cpp">

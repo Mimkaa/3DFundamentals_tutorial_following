@@ -126,12 +126,18 @@ public:
 			return proj;
 		}
 	
-		
+		void SetTime(float time_in)
+		{
+			time = time_in;
+		}
 		Output operator()(const Vertex& v) const
 		{
 			// apply transformations to world space
-			const auto p4 = Vec4(v.pos);
-			return { p4 * worldViewProj,Vec4{ v.n,0.0f } *worldView,p4 * worldView };
+			auto p4 = Vec4(v.pos);
+			p4 *= Mat4::RotationY(time);
+			auto normal = Vec4{ v.n,0.0f } *worldView;
+			normal *= Mat4::RotationY(time);
+			return { p4 * worldViewProj,normal,p4 * worldView };
 		}
 
 	private:
@@ -140,6 +146,7 @@ public:
 		Mat4 proj = Mat4::Identity();
 		Mat4 worldView = Mat4::Identity();
 		Mat4 worldViewProj = Mat4::Identity();
+		float time = 0.0f;
 
 
 	};
@@ -213,6 +220,7 @@ public:
 
 		float specular_power = 30.0f;
 		float specular_intensity = 0.6f;
+		
 	};
 public:
 	VertexShader vs;

@@ -174,6 +174,7 @@
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="MouseHandler.h" />
     <ClInclude Include="MyTimer.h" />
+    <ClInclude Include="NormiePipe.h" />
     <ClInclude Include="PhongEffect.h" />
     <ClInclude Include="PhongScene.h" />
     <ClInclude Include="Pipeline.h" />
